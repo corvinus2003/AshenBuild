@@ -1,0 +1,86 @@
+[
+  { "id": "dagger", "name": "Dagger", "category": "dagger", "weight": 1.0, "requirements": {"strength":5,"dexterity":12}, "scaling": {"strength":"-","dexterity":"D"}, "baseDamage": {"physical":40}, "maxUpgrade":10, "infusable":true, "poiseDamage":8 },
+  { "id": "bandits_knife", "name": "Bandit's Knife", "category": "dagger", "weight": 3.0, "requirements": {"strength":6,"dexterity":13}, "scaling": {"strength":"E","dexterity":"D"}, "baseDamage": {"physical":68}, "maxUpgrade":10, "infusable":true, "poiseDamage":12 },
+  { "id": "parrying_dagger", "name": "Parrying Dagger", "category": "dagger", "weight": 1.0, "requirements": {"strength":4,"dexterity":10}, "scaling": {"strength":"-","dexterity":"D"}, "baseDamage": {"physical":30}, "maxUpgrade":10, "infusable":true, "poiseDamage":6 },
+
+  { "id": "shortsword", "name": "Shortsword", "category": "straightSword", "weight": 3.0, "requirements": {"strength":8,"dexterity":11}, "scaling": {"strength":"D","dexterity":"D"}, "baseDamage": {"physical":58}, "maxUpgrade":10, "infusable":true, "poiseDamage":18 },
+  { "id": "longsword", "name": "Longsword", "category": "straightSword", "weight": 3.0, "requirements": {"strength":10,"dexterity":10}, "scaling": {"strength":"D","dexterity":"D"}, "baseDamage": {"physical":100}, "maxUpgrade":10, "infusable":true, "poiseDamage":25 },
+  { "id": "broadsword", "name": "Broadsword", "category": "straightSword", "weight": 4.0, "requirements": {"strength":12,"dexterity":10}, "scaling": {"strength":"D","dexterity":"D"}, "baseDamage": {"physical":104}, "maxUpgrade":10, "infusable":true, "poiseDamage":27 },
+  { "id": "astora_straight_sword", "name": "Astora Straight Sword", "category": "straightSword", "weight": 3.0, "requirements": {"strength":9,"dexterity":10}, "scaling": {"strength":"D","dexterity":"D"}, "baseDamage": {"physical":90}, "maxUpgrade":10, "infusable":true, "poiseDamage":24 },
+  { "id": "lothric_knight_sword", "name": "Lothric Knight Sword", "category": "straightSword", "weight": 3.0, "requirements": {"strength":10,"dexterity":14}, "scaling": {"strength":"D","dexterity":"C"}, "baseDamage": {"physical":96}, "maxUpgrade":10, "infusable":true, "poiseDamage":26 },
+
+  { "id": "claymore", "name": "Claymore", "category": "greatsword", "weight": 6.5, "requirements": {"strength":14,"dexterity":10}, "scaling": {"strength":"D","dexterity":"D"}, "baseDamage": {"physical":129}, "maxUpgrade":10, "infusable":true, "poiseDamage":38 },
+  { "id": "lothric_knight_greatsword", "name": "Lothric Knight Greatsword", "category": "greatsword", "weight": 9.0, "requirements": {"strength":20,"dexterity":10}, "scaling": {"strength":"C"}, "baseDamage": {"physical":140}, "maxUpgrade":10, "infusable":true, "poiseDamage":42 },
+  { "id": "drakeblood_greatsword", "name": "Drakeblood Greatsword", "category": "greatsword", "weight": 9.5, "requirements": {"strength":16,"dexterity":14}, "scaling": {"strength":"D","dexterity":"D"}, "baseDamage": {"physical":150}, "maxUpgrade":10, "infusable":true, "poiseDamage":44 },
+  { "id": "flamberge", "name": "Flamberge", "category": "greatsword", "weight": 9.0, "requirements": {"strength":14,"dexterity":16}, "scaling": {"strength":"E","dexterity":"D"}, "baseDamage": {"physical":135}, "maxUpgrade":10, "infusable":true, "poiseDamage":40 },
+
+  { "id": "zweihander", "name": "Zweihander", "category": "ultraGreatsword", "weight": 14.0, "requirements": {"strength":16,"dexterity":12}, "scaling": {"strength":"D","dexterity":"D"}, "baseDamage": {"physical":160}, "maxUpgrade":10, "infusable":true, "poiseDamage":60 },
+  { "id": "greatsword", "name": "Greatsword", "category": "ultraGreatsword", "weight": 12.0, "requirements": {"strength":24,"dexterity":10}, "scaling": {"strength":"D"}, "baseDamage": {"physical":150}, "maxUpgrade":10, "infusable":true, "poiseDamage":55 },
+  { "id": "profaned_greatsword", "name": "Profaned Greatsword", "category": "ultraGreatsword", "weight": 12.0, "requirements": {"strength":20,"dexterity":10,"intelligence":16,"faith":16}, "scaling": {"strength":"D","intelligence":"D","faith":"D"}, "baseDamage": {"physical":140,"dark":40}, "maxUpgrade":5, "infusable":false, "poiseDamage":58 },
+
+  { "id": "scimitar", "name": "Scimitar", "category": "curvedSword", "weight": 3.0, "requirements": {"strength":8,"dexterity":12}, "scaling": {"strength":"D","dexterity":"D"}, "baseDamage": {"physical":78}, "maxUpgrade":10, "infusable":true, "poiseDamage":16 },
+  { "id": "shotel", "name": "Shotel", "category": "curvedSword", "weight": 4.0, "requirements": {"strength":11,"dexterity":12}, "scaling": {"strength":"D","dexterity":"D"}, "baseDamage": {"physical":84}, "maxUpgrade":10, "infusable":true, "poiseDamage":18 },
+  { "id": "carthus_curved_sword", "name": "Carthus Curved Sword", "category": "curvedSword", "weight": 4.5, "requirements": {"strength":9,"dexterity":18}, "scaling": {"dexterity":"C"}, "baseDamage": {"physical":90}, "maxUpgrade":10, "infusable":true, "poiseDamage":20 },
+
+  { "id": "uchigatana", "name": "Uchigatana", "category": "katana", "weight": 4.5, "requirements": {"strength":10,"dexterity":15}, "scaling": {"strength":"D","dexterity":"C"}, "baseDamage": {"physical":95}, "maxUpgrade":10, "infusable":true, "poiseDamage":20 },
+  { "id": "washing_pole", "name": "Washing Pole", "category": "katana", "weight": 6.0, "requirements": {"strength":12,"dexterity":18}, "scaling": {"strength":"E","dexterity":"C"}, "baseDamage": {"physical":100}, "maxUpgrade":10, "infusable":true, "poiseDamage":22 },
+  { "id": "chaos_blade", "name": "Chaos Blade", "category": "katana", "weight": 4.0, "requirements": {"strength":10,"dexterity":20}, "scaling": {"dexterity":"C"}, "baseDamage": {"physical":85}, "maxUpgrade":5, "infusable":false, "poiseDamage":20 },
+
+  { "id": "rapier", "name": "Rapier", "category": "thrustingSword", "weight": 2.0, "requirements": {"strength":8,"dexterity":15}, "scaling": {"dexterity":"C"}, "baseDamage": {"physical":68}, "maxUpgrade":10, "infusable":true, "poiseDamage":12 },
+  { "id": "estoc", "name": "Estoc", "category": "thrustingSword", "weight": 4.0, "requirements": {"strength":11,"dexterity":13}, "scaling": {"strength":"D","dexterity":"D"}, "baseDamage": {"physical":85}, "maxUpgrade":10, "infusable":true, "poiseDamage":16 },
+  { "id": "ricards_rapier", "name": "Ricard's Rapier", "category": "thrustingSword", "weight": 3.0, "requirements": {"strength":10,"dexterity":16}, "scaling": {"dexterity":"C"}, "baseDamage": {"physical":75}, "maxUpgrade":10, "infusable":true, "poiseDamage":14 },
+
+  { "id": "hand_axe", "name": "Hand Axe", "category": "axe", "weight": 2.0, "requirements": {"strength":10,"dexterity":9}, "scaling": {"strength":"D","dexterity":"D"}, "baseDamage": {"physical":76}, "maxUpgrade":10, "infusable":true, "poiseDamage":20 },
+  { "id": "battle_axe", "name": "Battle Axe", "category": "axe", "weight": 6.0, "requirements": {"strength":14,"dexterity":10}, "scaling": {"strength":"C","dexterity":"D"}, "baseDamage": {"physical":112}, "maxUpgrade":10, "infusable":true, "poiseDamage":30 },
+
+  { "id": "greataxe", "name": "Greataxe", "category": "greataxe", "weight": 12.0, "requirements": {"strength":20,"dexterity":12}, "scaling": {"strength":"C"}, "baseDamage": {"physical":155}, "maxUpgrade":10, "infusable":true, "poiseDamage":55 },
+  { "id": "dragonslayer_greataxe", "name": "Dragonslayer's Axe", "category": "greataxe", "weight": 18.0, "requirements": {"strength":40,"dexterity":14}, "scaling": {"strength":"D"}, "baseDamage": {"physical":170}, "maxUpgrade":5, "infusable":false, "poiseDamage":65 },
+
+  { "id": "club", "name": "Club", "category": "hammer", "weight": 4.0, "requirements": {"strength":12,"dexterity":7}, "scaling": {"strength":"D"}, "baseDamage": {"physical":85}, "maxUpgrade":10, "infusable":true, "poiseDamage":24 },
+  { "id": "mace", "name": "Mace", "category": "hammer", "weight": 5.5, "requirements": {"strength":12,"dexterity":8}, "scaling": {"strength":"D"}, "baseDamage": {"physical":98}, "maxUpgrade":10, "infusable":true, "poiseDamage":28 },
+
+  { "id": "great_club", "name": "Great Club", "category": "greatHammer", "weight": 14.0, "requirements": {"strength":28,"dexterity":8}, "scaling": {"strength":"D"}, "baseDamage": {"physical":175}, "maxUpgrade":10, "infusable":true, "poiseDamage":70 },
+  { "id": "morne_great_hammer", "name": "Morne's Great Hammer", "category": "greatHammer", "weight": 15.0, "requirements": {"strength":31,"dexterity":8,"faith":16}, "scaling": {"strength":"D","faith":"D"}, "baseDamage": {"physical":180}, "maxUpgrade":5, "infusable":false, "poiseDamage":72 },
+
+  { "id": "spear", "name": "Spear", "category": "spear", "weight": 4.0, "requirements": {"strength":10,"dexterity":11}, "scaling": {"strength":"D","dexterity":"D"}, "baseDamage": {"physical":80}, "maxUpgrade":10, "infusable":true, "poiseDamage":18 },
+  { "id": "partizan", "name": "Partizan", "category": "spear", "weight": 5.0, "requirements": {"strength":12,"dexterity":13}, "scaling": {"strength":"D","dexterity":"D"}, "baseDamage": {"physical":88}, "maxUpgrade":10, "infusable":true, "poiseDamage":20 },
+  { "id": "pike", "name": "Pike", "category": "spear", "weight": 8.0, "requirements": {"strength":13,"dexterity":10}, "scaling": {"strength":"D"}, "baseDamage": {"physical":95}, "maxUpgrade":10, "infusable":true, "poiseDamage":22 },
+
+  { "id": "halberd", "name": "Halberd", "category": "halberd", "weight": 8.0, "requirements": {"strength":13,"dexterity":15}, "scaling": {"strength":"D","dexterity":"D"}, "baseDamage": {"physical":110}, "maxUpgrade":10, "infusable":true, "poiseDamage":32 },
+  { "id": "glaive", "name": "Glaive", "category": "halberd", "weight": 9.0, "requirements": {"strength":13,"dexterity":17}, "scaling": {"strength":"D","dexterity":"C"}, "baseDamage": {"physical":100}, "maxUpgrade":10, "infusable":true, "poiseDamage":30 },
+  { "id": "black_knight_glaive", "name": "Black Knight Glaive", "category": "halberd", "weight": 11.0, "requirements": {"strength":20,"dexterity":16}, "scaling": {"strength":"C","dexterity":"D"}, "baseDamage": {"physical":130}, "maxUpgrade":5, "infusable":false, "poiseDamage":36 },
+
+  { "id": "whip", "name": "Whip", "category": "whip", "weight": 1.5, "requirements": {"strength":6,"dexterity":12}, "scaling": {"dexterity":"D"}, "baseDamage": {"physical":50}, "maxUpgrade":10, "infusable":true, "poiseDamage":6 },
+  { "id": "notched_whip", "name": "Notched Whip", "category": "whip", "weight": 3.0, "requirements": {"strength":8,"dexterity":14}, "scaling": {"dexterity":"D"}, "baseDamage": {"physical":55}, "maxUpgrade":10, "infusable":true, "poiseDamage":6 },
+
+  { "id": "caestus", "name": "Caestus", "category": "fist", "weight": 1.0, "requirements": {"strength":6,"dexterity":8}, "scaling": {"strength":"D","dexterity":"D"}, "baseDamage": {"physical":48}, "maxUpgrade":10, "infusable":true, "poiseDamage":4 },
+  { "id": "dark_hand", "name": "Dark Hand", "category": "fist", "weight": 3.0, "requirements": {"strength":10,"dexterity":10}, "scaling": {}, "baseDamage": {"physical":60,"dark":20}, "maxUpgrade":5, "infusable":false, "poiseDamage":8 },
+
+  { "id": "shortbow", "name": "Shortbow", "category": "bow", "weight": 1.0, "requirements": {"dexterity":12}, "scaling": {"dexterity":"D"}, "baseDamage": {"physical":78}, "maxUpgrade":10, "infusable":true, "poiseDamage":0 },
+  { "id": "composite_bow", "name": "Composite Bow", "category": "bow", "weight": 3.0, "requirements": {"strength":12,"dexterity":15}, "scaling": {"strength":"D","dexterity":"C"}, "baseDamage": {"physical":85}, "maxUpgrade":10, "infusable":true, "poiseDamage":0 },
+  { "id": "greatbow", "name": "Greatbow", "category": "greatbow", "weight": 8.0, "requirements": {"strength":19,"dexterity":16}, "scaling": {"strength":"D","dexterity":"C"}, "baseDamage": {"physical":130}, "maxUpgrade":10, "infusable":true, "poiseDamage":0 },
+  { "id": "light_crossbow", "name": "Light Crossbow", "category": "crossbow", "weight": 4.0, "requirements": {"strength":8}, "scaling": {}, "baseDamage": {"physical":95}, "maxUpgrade":10, "infusable":false, "poiseDamage":0 },
+  { "id": "heavy_crossbow", "name": "Heavy Crossbow", "category": "crossbow", "weight": 8.0, "requirements": {"strength":12}, "scaling": {}, "baseDamage": {"physical":130}, "maxUpgrade":10, "infusable":false, "poiseDamage":0 },
+
+  { "id": "sorcerers_staff", "name": "Sorcerer's Staff", "category": "sorceryStaff", "weight": 2.0, "requirements": {"strength":7,"intelligence":12}, "scaling": {"intelligence":"D"}, "baseDamage": {"physical":35}, "maxUpgrade":10, "infusable":false, "poiseDamage":0 },
+  { "id": "heretics_staff", "name": "Heretic's Staff", "category": "sorceryStaff", "weight": 3.0, "requirements": {"strength":9,"intelligence":14,"faith":10}, "scaling": {"intelligence":"D","faith":"D"}, "baseDamage": {"physical":40}, "maxUpgrade":10, "infusable":false, "poiseDamage":0 },
+  { "id": "izalith_staff", "name": "Izalith Staff", "category": "sorceryStaff", "weight": 3.0, "requirements": {"strength":8,"intelligence":18}, "scaling": {"intelligence":"C"}, "baseDamage": {"physical":35}, "maxUpgrade":10, "infusable":false, "poiseDamage":0 },
+
+  { "id": "talisman", "name": "Talisman", "category": "talisman", "weight": 1.0, "requirements": {"faith":12}, "scaling": {"faith":"D"}, "baseDamage": {"physical":35}, "maxUpgrade":10, "infusable":false, "poiseDamage":0 },
+  { "id": "canvas_talisman", "name": "Canvas Talisman", "category": "talisman", "weight": 1.0, "requirements": {"faith":14}, "scaling": {"faith":"C"}, "baseDamage": {"physical":30}, "maxUpgrade":10, "infusable":false, "poiseDamage":0 },
+  { "id": "sunlight_talisman", "name": "Sunlight Talisman", "category": "talisman", "weight": 1.5, "requirements": {"faith":18}, "scaling": {"faith":"B"}, "baseDamage": {"physical":35}, "maxUpgrade":10, "infusable":false, "poiseDamage":0 },
+
+  { "id": "priests_chime", "name": "Priest's Chime", "category": "chime", "weight": 1.0, "requirements": {"faith":12}, "scaling": {"faith":"D"}, "baseDamage": {"physical":30}, "maxUpgrade":10, "infusable":false, "poiseDamage":0 },
+  { "id": "yorshkas_chime", "name": "Yorshka's Chime", "category": "chime", "weight": 1.0, "requirements": {"intelligence":10,"faith":18}, "scaling": {"intelligence":"D","faith":"C"}, "baseDamage": {"physical":35}, "maxUpgrade":10, "infusable":false, "poiseDamage":0 },
+
+  { "id": "pyromancy_flame", "name": "Pyromancy Flame", "category": "pyromancyFlame", "weight": 1.5, "requirements": {"intelligence":10,"faith":10}, "scaling": {"intelligence":"D","faith":"D"}, "baseDamage": {"physical":30}, "maxUpgrade":10, "infusable":false, "poiseDamage":0 },
+  { "id": "izalith_pyromancy_flame", "name": "Izalith Pyromancy Flame", "category": "pyromancyFlame", "weight": 1.5, "requirements": {"intelligence":14,"faith":14}, "scaling": {"intelligence":"C","faith":"C"}, "baseDamage": {"physical":35}, "maxUpgrade":10, "infusable":false, "poiseDamage":0 },
+
+  { "id": "heater_shield", "name": "Heater Shield", "category": "smallShield", "weight": 3.5, "requirements": {"strength":8}, "scaling": {}, "baseDamage": {"physical":40}, "maxUpgrade":10, "infusable":true, "poiseDamage":10 },
+  { "id": "target_shield", "name": "Target Shield", "category": "smallShield", "weight": 2.5, "requirements": {"strength":6}, "scaling": {}, "baseDamage": {"physical":35}, "maxUpgrade":10, "infusable":true, "poiseDamage":8 },
+  { "id": "caduceus_round_shield", "name": "Caduceus Round Shield", "category": "smallShield", "weight": 3.0, "requirements": {"strength":8,"faith":10}, "scaling": {"faith":"D"}, "baseDamage": {"physical":35}, "maxUpgrade":10, "infusable":false, "poiseDamage":8 },
+
+  { "id": "silver_knight_shield", "name": "Silver Knight Shield", "category": "greatshield", "weight": 7.0, "requirements": {"strength":16}, "scaling": {}, "baseDamage": {"physical":50}, "maxUpgrade":10, "infusable":true, "poiseDamage":22 },
+  { "id": "dragon_crest_shield", "name": "Dragon Crest Shield", "category": "greatshield", "weight": 9.0, "requirements": {"strength":18}, "scaling": {}, "baseDamage": {"physical":55}, "maxUpgrade":10, "infusable":false, "poiseDamage":26 },
+  { "id": "greatshield_of_glory", "name": "Greatshield of Glory", "category": "greatshield", "weight": 12.0, "requirements": {"strength":30}, "scaling": {}, "baseDamage": {"physical":60}, "maxUpgrade":5, "infusable":false, "poiseDamage":30 }
+]
