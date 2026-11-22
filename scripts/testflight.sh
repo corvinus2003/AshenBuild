@@ -1,5 +1,6 @@
 #!/bin/zsh
-# Builds a signed App Store package (build/appstore/export/AshenBuild.ipa).
+# Builds a signed App Store package in ~/Library/Developer/AshenBuild/export/AshenBuild.ipa
+# (outside OneDrive on purpose: OneDrive locks freshly built files and export times out).
 # With --upload it also sends the build to App Store Connect for TestFlight,
 # using the Apple ID signed in to Xcode (Settings > Accounts).
 #
@@ -8,8 +9,10 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-ARCHIVE=build/appstore/AshenBuild.xcarchive
-rm -rf "$ARCHIVE" build/appstore/export
+OUT="${ASHEN_BUILD_DIR:-$HOME/Library/Developer/AshenBuild}"
+ARCHIVE="$OUT/AshenBuild.xcarchive"
+mkdir -p "$OUT"
+rm -rf "$ARCHIVE" "$OUT/export"
 
 xcodebuild archive -project AshenBuild.xcodeproj -scheme AshenBuild -configuration Release \
   -destination 'generic/platform=iOS' -archivePath "$ARCHIVE" \
@@ -22,4 +25,5 @@ if [[ "${1:-}" == "--upload" ]]; then
 fi
 
 xcodebuild -exportArchive -archivePath "$ARCHIVE" -exportOptionsPlist "$OPTIONS" \
-  -exportPath build/appstore/export -allowProvisioningUpdates | grep -E "error|EXPORT|Upload"
+  -exportPath "$OUT/export" -allowProvisioningUpdates | grep -E "error|EXPORT|Upload"
+echo "Package: $OUT/export/AshenBuild.ipa"

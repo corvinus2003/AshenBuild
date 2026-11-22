@@ -15,10 +15,11 @@ Ashen Build ships to **TestFlight first**. App Review guideline 2.2 keeps betas 
 ## Build
 
 ```sh
-scripts/testflight.sh            # signed package in build/appstore/export
+scripts/testflight.sh            # signed package in ~/Library/Developer/AshenBuild/export
 scripts/testflight.sh --upload   # same, then upload to App Store Connect
 ```
 
+Builds go outside OneDrive on purpose: OneDrive locks freshly written files and the export step times out.
 Raise `CURRENT_PROJECT_VERSION` (build number) before every new upload.
 
 ## Checklist
