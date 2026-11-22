@@ -37,6 +37,7 @@
 		EDCCA948B0594E8E9B7D6E39 /* OptimizeTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E39872C0E8456CB9BE575B /* OptimizeTab.swift */; };
 		EC01820EB8B44966B3BEA604 /* WeaponGridPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F7EB8B2BEAA4F9281A5CD3C /* WeaponGridPicker.swift */; };
 		31910DCFDA004682B06BAE4D /* ArmorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB664E10A21F4C428B5F5017 /* ArmorPicker.swift */; };
+		3307DEC6D4C34423A1EDA6E6 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C6AA30FFC7314E7CB94CC04B /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -82,6 +83,7 @@
 		F3E39872C0E8456CB9BE575B /* OptimizeTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptimizeTab.swift; sourceTree = "<group>"; };
 		1F7EB8B2BEAA4F9281A5CD3C /* WeaponGridPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponGridPicker.swift; sourceTree = "<group>"; };
 		DB664E10A21F4C428B5F5017 /* ArmorPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArmorPicker.swift; sourceTree = "<group>"; };
+		C6AA30FFC7314E7CB94CC04B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +172,7 @@
 				A6465A597C3D4E2D950C2210 /* GameData */,
 				2F04F6E995AF41F3ABF912BC /* Views */,
 				4F21E3EB6D2F4AC983BA2BB4 /* Assets.xcassets */,
+				C6AA30FFC7314E7CB94CC04B /* PrivacyInfo.xcprivacy */,
 			);
 			name = "AshenBuild";
 			path = "AshenBuild";
@@ -288,6 +291,7 @@
 				27D53527D6EF4EEDB3D158D6 /* Armor.json in Resources */,
 				8914D84EAC3049CBAF0EEBA9 /* Rings.json in Resources */,
 				CEC2DC78B15B4CB79E465C9D /* Assets.xcassets in Resources */,
+				3307DEC6D4C34423A1EDA6E6 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -480,17 +484,19 @@
 			ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 			ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 			CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 83S5G3QWTM;
 			CURRENT_PROJECT_VERSION = 1;
 			GENERATE_INFOPLIST_FILE = YES;
 			INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 			INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 			INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 			INFOPLIST_KEY_CFBundleDisplayName = "Ashen Build";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Corvin Ghita";
 			INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 			INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 			INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 			"INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-			MARKETING_VERSION = 1.0;
+			MARKETING_VERSION = 0.1.0;
 			PRODUCT_BUNDLE_IDENTIFIER = io.github.corvinus2003.ashenbuild;
 			PRODUCT_NAME = "$(TARGET_NAME)";
 			SWIFT_EMIT_LOC_STRINGS = YES;
@@ -505,17 +511,19 @@
 			ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 			ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 			CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 83S5G3QWTM;
 			CURRENT_PROJECT_VERSION = 1;
 			GENERATE_INFOPLIST_FILE = YES;
 			INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 			INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 			INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 			INFOPLIST_KEY_CFBundleDisplayName = "Ashen Build";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Corvin Ghita";
 			INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 			INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 			INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 			"INFOPLIST_KEY_UISupportedInterfaceOrientations~ipad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-			MARKETING_VERSION = 1.0;
+			MARKETING_VERSION = 0.1.0;
 			PRODUCT_BUNDLE_IDENTIFIER = io.github.corvinus2003.ashenbuild;
 			PRODUCT_NAME = "$(TARGET_NAME)";
 			SWIFT_EMIT_LOC_STRINGS = YES;
@@ -530,9 +538,10 @@
 			ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 			BUNDLE_LOADER = "$(TEST_HOST)";
 			CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 83S5G3QWTM;
 			CURRENT_PROJECT_VERSION = 1;
 			GENERATE_INFOPLIST_FILE = YES;
-			MARKETING_VERSION = 1.0;
+			MARKETING_VERSION = 0.1.0;
 			PRODUCT_BUNDLE_IDENTIFIER = io.github.corvinus2003.ashenbuild.tests;
 			PRODUCT_NAME = "$(TARGET_NAME)";
 			SWIFT_EMIT_LOC_STRINGS = NO;
@@ -548,9 +557,10 @@
 			ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 			BUNDLE_LOADER = "$(TEST_HOST)";
 			CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 83S5G3QWTM;
 			CURRENT_PROJECT_VERSION = 1;
 			GENERATE_INFOPLIST_FILE = YES;
-			MARKETING_VERSION = 1.0;
+			MARKETING_VERSION = 0.1.0;
 			PRODUCT_BUNDLE_IDENTIFIER = io.github.corvinus2003.ashenbuild.tests;
 			PRODUCT_NAME = "$(TARGET_NAME)";
 			SWIFT_EMIT_LOC_STRINGS = NO;

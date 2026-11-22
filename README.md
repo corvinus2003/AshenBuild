@@ -71,7 +71,7 @@ Code map: game data in `AshenBuild/GameData/*.json`, stat curves in `Formulas.sw
 1. Complete weapon, shield, catalyst and armor catalogs.
 2. Exact attack-rating model with per-weapon scaling and correction curves.
 3. Damage against enemy defenses and spell/buff calculations.
-4. TestFlight beta, then the App Store.
+4. TestFlight beta (being prepared: see [AppStore/README.md](AppStore/README.md)), then the App Store.
 
 ## How it was built
 
