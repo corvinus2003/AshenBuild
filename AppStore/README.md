@@ -6,6 +6,7 @@ Ashen Build ships to **TestFlight first**. App Review guideline 2.2 keeps betas 
 | --- | --- |
 | Bundle ID | `io.github.corvinus2003.ashenbuild` (can never change once published) |
 | Team | 83S5G3QWTM |
+| App Store Connect app ID | 6837857514 |
 | Version | 0.1.0 (build 1) |
 | Store texts | [metadata/en-US.md](metadata/en-US.md) |
 | Screenshots (6.9", 1320×2868, no alpha) | [screenshots/](screenshots/) |
@@ -25,7 +26,7 @@ Raise `CURRENT_PROJECT_VERSION` (build number) before every new upload.
 ## Checklist
 
 App Store Connect, once
-- [ ] My Apps ▸ + ▸ New App: iOS, name "Ashen Build", language English (U.S.), bundle ID `io.github.corvinus2003.ashenbuild`, SKU `ashenbuild`
+- [x] My Apps ▸ + ▸ New App: iOS, name "Ashen Build", language English (U.S.), bundle ID `io.github.corvinus2003.ashenbuild`, SKU `ashenbuild`
 - [ ] App Privacy: Data Not Collected; privacy policy URL from metadata
 - [ ] Age rating questionnaire: none of the items (expected 4+)
 
