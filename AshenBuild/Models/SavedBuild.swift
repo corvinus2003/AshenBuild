@@ -21,7 +21,11 @@ final class SavedBuild {
     var faith: Int = 10
     var luck: Int = 10
 
-    // Main-hand weapon
+    // Weapons, spells and buff (three slots per hand, as in the game). Stored as JSON so the
+    // shape can grow without SwiftData migrations; see `loadout`.
+    var loadoutData: Data?
+
+    // Legacy single-slot fields from version 0.1 builds, read once into `loadout`.
     var mainHandWeaponID: String?
     var mainHandUpgradeLevel: Int = 0
     var mainHandInfusion: String = InfusionType.none.rawValue
@@ -92,6 +96,7 @@ extension SavedBuild {
     /// A new, unsaved build with the same choices, named "<name> Copy".
     func duplicate() -> SavedBuild {
         let copy = SavedBuild(name: "\(name) Copy", classID: classID, statBlock: statBlock)
+        copy.loadoutData = loadoutData
         copy.mainHandWeaponID = mainHandWeaponID
         copy.mainHandUpgradeLevel = mainHandUpgradeLevel
         copy.mainHandInfusion = mainHandInfusion
@@ -108,5 +113,45 @@ extension SavedBuild {
         copy.ring3ID = ring3ID
         copy.ring4ID = ring4ID
         return copy
+    }
+}
+
+/// One weapon slot.
+struct StoredWeapon: Codable, Hashable {
+    var weaponID: String?
+    var upgrade: Int = 0
+    var infusion: String = InfusionType.none.rawValue
+
+    var setup: WeaponSetup {
+        WeaponSetup(weaponID: weaponID, upgrade: upgrade, infusion: InfusionType(rawValue: infusion) ?? .none)
+    }
+}
+
+/// Everything the character holds and casts.
+struct Loadout: Codable, Hashable {
+    var right: [StoredWeapon] = Array(repeating: StoredWeapon(), count: 3)
+    var left: [StoredWeapon] = Array(repeating: StoredWeapon(), count: 3)
+    var activeRight = 0
+    var activeLeft = 0
+    var twoHanded = false
+    var spellIDs: [String] = []
+    /// Weapon buff applied to the right-hand weapon (a spell or resin id), if any.
+    var buffID: String?
+}
+
+extension SavedBuild {
+    var loadout: Loadout {
+        get {
+            if let data = loadoutData, let value = try? JSONDecoder().decode(Loadout.self, from: data) { return value }
+            var value = Loadout()
+            value.right[0] = StoredWeapon(weaponID: mainHandWeaponID, upgrade: mainHandUpgradeLevel, infusion: mainHandInfusion)
+            value.left[0] = StoredWeapon(weaponID: offHandWeaponID, upgrade: offHandUpgradeLevel, infusion: offHandInfusion)
+            value.twoHanded = twoHanded
+            return value
+        }
+        set {
+            loadoutData = try? JSONEncoder().encode(newValue)
+            updatedAt = .now
+        }
     }
 }

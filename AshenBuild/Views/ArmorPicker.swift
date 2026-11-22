@@ -65,7 +65,7 @@ struct ArmorPicker: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(piece.name)
-                                DetailLine(["\(piece.weight.oneDecimal) wt", "\(piece.physicalDefense.standard.whole) phys",
+                                DetailLine(["\(piece.weight.oneDecimal) wt", "\(piece.physicalDefense.standard.oneDecimal)% phys",
                                             "\(piece.poise.oneDecimal) poise"])
                             }
                             Spacer(minLength: 8)
@@ -101,7 +101,7 @@ struct ArmorPicker: View {
         case .weight:
             Text(piece.weight.oneDecimal).font(.headline.monospacedDigit())
         case .metric(let goal):
-            Text(goal == .poise || goal == .elemental ? goal.value(piece).oneDecimal : "\(goal.value(piece).whole)")
+            Text(goal.isAbsorption ? "\(goal.value(piece).oneDecimal)%" : goal.value(piece).oneDecimal)
                 .font(.headline.monospacedDigit())
                 .foregroundStyle(.tint)
         }
@@ -178,7 +178,7 @@ struct ArmorOptimizerView: View {
                                 }
                             }
                             HStack {
-                                stat(goal.rawValue, goal == .poise ? set.value.oneDecimal : "\(set.value.whole)", highlight: true)
+                                stat(goal.rawValue, goal.isAbsorption ? "\(set.value.oneDecimal)%" : set.value.oneDecimal, highlight: true)
                                 stat("Poise", set.poise.oneDecimal)
                                 stat("Weight", set.weight.oneDecimal)
                                 stat("Load", "\(Int((set.loadFraction * 100).rounded()))%")

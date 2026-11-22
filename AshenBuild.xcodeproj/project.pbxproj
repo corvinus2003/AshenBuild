@@ -38,6 +38,10 @@
 		EC01820EB8B44966B3BEA604 /* WeaponGridPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F7EB8B2BEAA4F9281A5CD3C /* WeaponGridPicker.swift */; };
 		31910DCFDA004682B06BAE4D /* ArmorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB664E10A21F4C428B5F5017 /* ArmorPicker.swift */; };
 		3307DEC6D4C34423A1EDA6E6 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C6AA30FFC7314E7CB94CC04B /* PrivacyInfo.xcprivacy */; };
+		96A491146B3043768FDFCCE4 /* Spell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65A82BEB0064FEE8F594E9A /* Spell.swift */; };
+		421B046ECB1E48D08300BBAB /* Curves.json in Resources */ = {isa = PBXBuildFile; fileRef = 9CA807097BF644BB835D8D7E /* Curves.json */; };
+		B3C9028113414AC1A2B6F905 /* Spells.json in Resources */ = {isa = PBXBuildFile; fileRef = 447A2D809BDC4F63B7D2C9B5 /* Spells.json */; };
+		EDF94EFE41F64C09A5750248 /* MagicTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F8745D85DCE49F989AB069E /* MagicTab.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,6 +88,10 @@
 		1F7EB8B2BEAA4F9281A5CD3C /* WeaponGridPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponGridPicker.swift; sourceTree = "<group>"; };
 		DB664E10A21F4C428B5F5017 /* ArmorPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArmorPicker.swift; sourceTree = "<group>"; };
 		C6AA30FFC7314E7CB94CC04B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		F65A82BEB0064FEE8F594E9A /* Spell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spell.swift; sourceTree = "<group>"; };
+		9CA807097BF644BB835D8D7E /* Curves.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Curves.json; sourceTree = "<group>"; };
+		447A2D809BDC4F63B7D2C9B5 /* Spells.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Spells.json; sourceTree = "<group>"; };
+		2F8745D85DCE49F989AB069E /* MagicTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MagicTab.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,6 +127,7 @@
 		2F04F6E995AF41F3ABF912BC /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				2F8745D85DCE49F989AB069E /* MagicTab.swift */,
 				DB664E10A21F4C428B5F5017 /* ArmorPicker.swift */,
 				1F7EB8B2BEAA4F9281A5CD3C /* WeaponGridPicker.swift */,
 				F3E39872C0E8456CB9BE575B /* OptimizeTab.swift */,
@@ -137,6 +146,7 @@
 		4F0F71A4301A416586426CE9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				F65A82BEB0064FEE8F594E9A /* Spell.swift */,
 				B29FE6DD380D44ECB91366A8 /* StatBlock.swift */,
 				6161A9D521234B05A7FEF7AA /* StartingClass.swift */,
 				471CC3C870B14690A30780B0 /* Weapon.swift */,
@@ -159,6 +169,8 @@
 				75323BE81CE24A7F9B1A9793 /* Weapons.json */,
 				89AAE561B4434334B84A69C2 /* Armor.json */,
 				16E4A5D811DB40B599ED4C3D /* Rings.json */,
+				447A2D809BDC4F63B7D2C9B5 /* Spells.json */,
+				9CA807097BF644BB835D8D7E /* Curves.json */,
 			);
 			name = "GameData";
 			path = "GameData";
@@ -290,6 +302,8 @@
 				BD0BB92483224D2E9F3E7E9E /* Weapons.json in Resources */,
 				27D53527D6EF4EEDB3D158D6 /* Armor.json in Resources */,
 				8914D84EAC3049CBAF0EEBA9 /* Rings.json in Resources */,
+				B3C9028113414AC1A2B6F905 /* Spells.json in Resources */,
+				421B046ECB1E48D08300BBAB /* Curves.json in Resources */,
 				CEC2DC78B15B4CB79E465C9D /* Assets.xcassets in Resources */,
 				3307DEC6D4C34423A1EDA6E6 /* PrivacyInfo.xcprivacy in Resources */,
 			);
@@ -309,6 +323,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EDF94EFE41F64C09A5750248 /* MagicTab.swift in Sources */,
+				96A491146B3043768FDFCCE4 /* Spell.swift in Sources */,
 				31910DCFDA004682B06BAE4D /* ArmorPicker.swift in Sources */,
 				EC01820EB8B44966B3BEA604 /* WeaponGridPicker.swift in Sources */,
 				EDCCA948B0594E8E9B7D6E39 /* OptimizeTab.swift in Sources */,

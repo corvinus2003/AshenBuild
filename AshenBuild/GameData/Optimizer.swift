@@ -74,6 +74,18 @@ enum ArmorGoal: String, CaseIterable, Identifiable {
 
     var id: Self { self }
 
+    /// Absorptions combine multiplicatively in the game; poise and resistances add up.
+    var isAbsorption: Bool {
+        switch self {
+        case .poise, .bleed, .poison, .frost, .curse: return false
+        default: return true
+        }
+    }
+
+    func total(_ pieces: [ArmorPiece]) -> Double {
+        isAbsorption ? Formulas.combinedAbsorption(pieces.map(value)) : pieces.reduce(0) { $0 + value($1) }
+    }
+
     func value(_ piece: ArmorPiece) -> Double {
         switch self {
         case .poise: return piece.poise
@@ -139,7 +151,7 @@ enum Optimizer {
         for (setup, isMain) in [(spec.mainHand, true), (spec.offHand, false)] {
             guard let weapon = data.weapon(setup.weaponID) else { continue }
             for stat in damageStats {
-                let required = weapon.requirements.requirement(for: stat)
+                let required = weapon.requirements(setup.infusion).requirement(for: stat)
                 guard required > 0 else { continue }
                 var needed = required - bonus[stat, default: 0]
                 if stat == .strength && isMain && setup.twoHanded && weapon.canTwoHand {
@@ -149,6 +161,12 @@ enum Optimizer {
                 }
                 stats[stat] = max(stats[stat], min(99, needed))
             }
+        }
+
+        // A weapon-buff spell must stay castable.
+        if let buff = data.spell(spec.loadout.buffID), buff.school != .item {
+            stats[.intelligence] = max(stats[.intelligence], min(99, buff.int - bonus[.intelligence, default: 0]))
+            stats[.faith] = max(stats[.faith], min(99, buff.fth - bonus[.faith, default: 0]))
         }
 
         var remaining = budget - stats.total
@@ -162,9 +180,12 @@ enum Optimizer {
         let primary = spec.mainHand.weaponID != nil ? spec.mainHand : spec.offHand
         let load = BuildCalculator.totalWeight(spec: spec, rings: rings,
                                                pieces: ArmorSlot.allCases.compactMap { data.armorPiece(spec.armor[$0]) }, data: data)
+        let buff = data.spell(spec.loadout.buffID)
         func attack(_ s: StatBlock) -> Double {
-            BuildCalculator.weaponReport(primary, effective: BuildCalculator.effectiveStats(s, rings: rings),
-                                         rings: rings, load: load, data: data)?.total ?? 0
+            let effective = BuildCalculator.effectiveStats(s, rings: rings)
+            let spellBuffs = BuildCalculator.spellBuffs(spec: spec, stats: effective, data: data)
+            return BuildCalculator.weaponReportWithBuff(primary, buff: primary == spec.mainHand ? buff : nil, effective: effective,
+                                                        rings: rings, load: load, spellBuffs: spellBuffs, data: data).0?.total ?? 0
         }
         var currentAR = attack(stats)
         while remaining > 0 {
@@ -236,7 +257,7 @@ enum Optimizer {
         // Requirements.
         for report in [current.mainHand, current.offHand].compactMap({ $0 }) where !report.result.meetsRequirements {
             let missing = damageStats.compactMap { stat -> String? in
-                let req = report.weapon.requirements.requirement(for: stat)
+                let req = report.weapon.requirements(report.setup.infusion).requirement(for: stat)
                 var have = current.effectiveStats[stat]
                 if stat == .strength && report.setup.twoHanded && report.weapon.canTwoHand {
                     have = Int((Double(have) * 1.5).rounded(.down))
@@ -244,22 +265,31 @@ enum Optimizer {
                 return req > have ? "\(stat.shortName) \(req) (you have \(have))" : nil
             }
             issues.append(Issue(kind: .warning, title: "\(report.weapon.name) is under-levelled",
-                                detail: "Needs " + missing.joined(separator: ", ") + ". Damage drops to \(Int(report.result.requirementRatio * 100))%."))
+                                detail: "Needs " + missing.joined(separator: ", ") + ". Below the requirements the weapon deals far less damage in the game."))
         }
 
         // Points in stats nothing uses.
-        let weapons = [spec.mainHand, spec.offHand].compactMap { setup -> (Weapon, WeaponScaling)? in
-            guard let w = data.weapon(setup.weaponID) else { return nil }
-            return (w, (w.infusable ? setup.infusion.overriddenScaling : nil) ?? w.scaling)
+        let equipped = spec.allWeapons.compactMap { setup -> (Weapon, WeaponSetup)? in
+            data.weapon(setup.weaponID).map { ($0, setup) }
         }
+        let attuned = spec.loadout.spellIDs.compactMap { data.spell($0) } + [data.spell(spec.loadout.buffID)].compactMap { $0 }
+        let weapons = equipped
         for stat in damageStats {
-            let scales = weapons.contains { $0.1.grade(for: stat) != .none }
-            let need = weapons.map { $0.0.requirements.requirement(for: stat) }.max() ?? 0
+            let scales = equipped.contains { w, setup in
+                if let v = w.variant(setup.infusion), v.grade(stat, at: setup.upgrade) != .none { return true }
+                if let cat = w.catalyst {
+                    let k = cat.spellBuff[safe: setup.upgrade] ?? cat.spellBuff.last ?? [0, 0]
+                    return (stat == .intelligence && k[0] > 0) || (stat == .faith && k[1] > 0)
+                }
+                return false
+            }
+            let spellNeed = attuned.map { stat == .intelligence ? $0.int : stat == .faith ? $0.fth : 0 }.max() ?? 0
+            let need = max(spellNeed, equipped.map { $0.0.requirements($0.1.infusion).requirement(for: stat) }.max() ?? 0)
             let floor = max(current.baseStats[stat], need)
             let extra = spec.stats[stat] - floor
             if !scales && extra > 0 && !weapons.isEmpty {
                 issues.append(Issue(kind: .info, title: "\(extra) points in \(stat.displayName) do nothing",
-                                    detail: "Neither weapon scales with \(stat.displayName) and the requirement is \(need)."))
+                                    detail: "Nothing you equip scales with \(stat.displayName), and the highest requirement (weapons and spells) is \(need)."))
             }
         }
         let luckExtra = spec.stats[.luck] - current.baseStats[.luck]
@@ -334,7 +364,7 @@ enum Optimizer {
     /// Every infusion of the main-hand weapon, each with its best respec.
     static func infusionOptions(_ spec: BuildSpec, goal: RespecGoal, data: DataStore) -> [WeaponOption] {
         guard let weapon = data.weapon(spec.mainHand.weaponID), weapon.infusable else { return [] }
-        return InfusionType.allCases.map { infusion in
+        return weapon.infusions.map { infusion in
             var trial = spec
             trial.mainHand.infusion = infusion
             return WeaponOption(setup: trial.mainHand, weapon: weapon, respec: respec(trial, goal: goal, data: data))
@@ -347,7 +377,6 @@ enum Optimizer {
     static func weaponOptions(_ spec: BuildSpec, goal: RespecGoal, data: DataStore, limit: Int = 6) -> [WeaponOption] {
         let current = data.weapon(spec.mainHand.weaponID)
         let progress = current.map { Double(spec.mainHand.upgrade) / Double(max(1, $0.maxUpgrade)) } ?? 1
-        let wantsCaster = current?.category.isCastingTool ?? false
         // A heavier weapon must not silently cost the build its roll: keep the current
         // roll (paying for any Vitality it needs) unless the goal names one.
         var goal = goal
@@ -357,11 +386,11 @@ enum Optimizer {
         }
 
         let candidates = data.weapons.filter { w in
-            !w.category.isShield && w.category.isCastingTool == wantsCaster
+            w.hasAttackTables && w.kind == .melee
         }
         let options = candidates.compactMap { weapon -> WeaponOption? in
             let upgrade = Int((progress * Double(weapon.maxUpgrade)).rounded())
-            let infusions = weapon.infusable ? InfusionType.allCases : [.none]
+            let infusions = weapon.infusions
             return infusions.map { infusion -> WeaponOption in
                 var trial = spec
                 trial.mainHand = WeaponSetup(weaponID: weapon.id, upgrade: upgrade, infusion: infusion,
@@ -412,7 +441,7 @@ enum Optimizer {
             guard rank(Formulas.rollTier(loadPercent: fraction)) <= rank(roll) else { continue }
             var pieces: [ArmorSlot: ArmorPiece] = [:]
             for p in set { pieces[p.slot] = p }
-            results.append(ArmorSet(pieces: pieces, weight: weight, value: set.reduce(0) { $0 + goal.value($1) },
+            results.append(ArmorSet(pieces: pieces, weight: weight, value: goal.total(set),
                                     poise: poise, loadFraction: fraction))
         }}}}
         results.sort { ($0.value, -$0.weight) > ($1.value, -$1.weight) }

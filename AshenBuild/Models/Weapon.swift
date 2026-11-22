@@ -1,70 +1,34 @@
-import Foundation
+import SwiftUI
 
-enum WeaponCategory: String, Codable, CaseIterable, Identifiable {
-    case dagger, straightSword, greatsword, ultraGreatsword, curvedSword, katana
-    case thrustingSword, axe, greataxe, hammer, greatHammer, spear, halberd
-    case whip, fist, bow, greatbow, crossbow
-    case sorceryStaff, talisman, chime, pyromancyFlame
-    case smallShield, greatshield
-
-    var id: String { rawValue }
+/// What a weapon is used for. Only melee weapons carry the full attack-rating tables.
+enum WeaponKind: String, Codable, CaseIterable {
+    case melee, catalyst, shield, bow, greatbow, crossbow
 
     var displayName: String {
         switch self {
-        case .dagger: return "Dagger"
-        case .straightSword: return "Straight Sword"
-        case .greatsword: return "Greatsword"
-        case .ultraGreatsword: return "Ultra Greatsword"
-        case .curvedSword: return "Curved Sword"
-        case .katana: return "Katana"
-        case .thrustingSword: return "Thrusting Sword"
-        case .axe: return "Axe"
-        case .greataxe: return "Greataxe"
-        case .hammer: return "Hammer"
-        case .greatHammer: return "Great Hammer"
-        case .spear: return "Spear"
-        case .halberd: return "Halberd"
-        case .whip: return "Whip"
-        case .fist: return "Fist Weapon"
+        case .melee: return "Melee"
+        case .catalyst: return "Catalyst"
+        case .shield: return "Shield"
         case .bow: return "Bow"
         case .greatbow: return "Greatbow"
         case .crossbow: return "Crossbow"
-        case .sorceryStaff: return "Sorcery Catalyst"
-        case .talisman: return "Talisman"
-        case .chime: return "Chime"
-        case .pyromancyFlame: return "Pyromancy Flame"
-        case .smallShield: return "Small Shield"
-        case .greatshield: return "Greatshield"
         }
-    }
-
-    /// Casting tools don't get a meaningful two-handing bonus the way melee weapons do.
-    var isCastingTool: Bool {
-        switch self {
-        case .sorceryStaff, .talisman, .chime, .pyromancyFlame: return true
-        default: return false
-        }
-    }
-
-    var isShield: Bool {
-        self == .smallShield || self == .greatshield
     }
 }
 
-enum ScalingGrade: String, Codable, CaseIterable {
+/// Scaling grade as the game's equipment screen shows it, from the correction value.
+enum ScalingGrade: String {
     case s = "S", a = "A", b = "B", c = "C", d = "D", e = "E", none = "-"
 
-    /// Fraction of a stat's max scaling bonus granted at 99 points in that stat.
-    /// These approximate DS3's real per-grade scaling curves (soft-capped, S > A > B > C > D > E).
-    var multiplierAt99: Double {
-        switch self {
-        case .s: return 1.10
-        case .a: return 0.90
-        case .b: return 0.70
-        case .c: return 0.50
-        case .d: return 0.30
-        case .e: return 0.15
-        case .none: return 0.0
+    init(correction value: Double) {
+        switch value {
+        case 175...: self = .s
+        case 140..<175: self = .a
+        case 90..<140: self = .b
+        case 60..<90: self = .c
+        case 25..<60: self = .d
+        case 0.5..<25: self = .e
+        default: self = .none
         }
     }
 }
@@ -73,76 +37,29 @@ enum DamageType: String, Codable, CaseIterable, Identifiable {
     case physical, magic, fire, lightning, dark
     var id: String { rawValue }
     var displayName: String { rawValue.capitalized }
+    var index: Int { DamageType.allCases.firstIndex(of: self)! }
 }
 
 enum InfusionType: String, Codable, CaseIterable, Identifiable {
     case none = "Normal", heavy = "Heavy", sharp = "Sharp", refined = "Refined"
-    case raw = "Raw", crystal = "Crystal", simple = "Simple", fire = "Fire"
-    case chaos = "Chaos", lightning = "Lightning", deep = "Deep", dark = "Dark"
-    case poison = "Poison", blood = "Blood", blessed = "Blessed", hollow = "Hollow"
+    case simple = "Simple", crystal = "Crystal", fire = "Fire", chaos = "Chaos"
+    case lightning = "Lightning", deep = "Deep", dark = "Dark", poison = "Poison"
+    case blood = "Blood", raw = "Raw", blessed = "Blessed", hollow = "Hollow"
 
     var id: String { rawValue }
     var displayName: String { rawValue }
-
-    /// Physical damage multiplier applied by this infusion (most infusions trade some
-    /// physical damage for an elemental split or a scaling change).
-    var physicalMultiplier: Double {
-        switch self {
-        case .none, .heavy, .sharp, .refined, .crystal, .blood, .hollow: return 1.0
-        case .raw: return 0.90
-        case .simple: return 0.90
-        case .fire, .chaos, .lightning, .dark, .deep, .poison, .blessed: return 0.75
-        }
-    }
-
-    /// Elemental damage this infusion adds, expressed as a fraction of the weapon's
-    /// *unmodified* base physical damage (a simplified stand-in for the real per-weapon tables).
-    var elementalFraction: Double {
-        switch self {
-        case .fire, .chaos, .lightning, .dark, .poison, .blessed, .deep: return 0.55
-        default: return 0.0
-        }
-    }
-
-    var elementalType: DamageType? {
-        switch self {
-        case .fire, .chaos: return .fire
-        case .lightning: return .lightning
-        case .dark, .deep: return .dark
-        default: return nil
-        }
-    }
-
-    /// The full replacement STR/DEX/INT/FAI scaling grades once this infusion is applied.
-    /// `.none` (the "Normal" infusion) returns nil, meaning "keep the weapon's own scaling".
-    /// These are simplified stand-ins for DS3's real per-infusion scaling tables.
-    var overriddenScaling: WeaponScaling? {
-        switch self {
-        case .none: return nil
-        case .heavy: return WeaponScaling(strength: .a, dexterity: .none, intelligence: .none, faith: .none)
-        case .sharp: return WeaponScaling(strength: .none, dexterity: .a, intelligence: .none, faith: .none)
-        case .refined: return WeaponScaling(strength: .b, dexterity: .b, intelligence: .none, faith: .none)
-        case .raw: return WeaponScaling(strength: .none, dexterity: .none, intelligence: .none, faith: .none)
-        case .crystal: return WeaponScaling(strength: .b, dexterity: .b, intelligence: .none, faith: .none)
-        case .simple: return WeaponScaling(strength: .none, dexterity: .none, intelligence: .d, faith: .none)
-        case .fire: return WeaponScaling(strength: .none, dexterity: .none, intelligence: .none, faith: .none)
-        case .chaos: return WeaponScaling(strength: .none, dexterity: .none, intelligence: .none, faith: .none)
-        case .lightning: return WeaponScaling(strength: .none, dexterity: .none, intelligence: .none, faith: .c)
-        case .deep: return WeaponScaling(strength: .none, dexterity: .none, intelligence: .none, faith: .c)
-        case .dark: return WeaponScaling(strength: .none, dexterity: .none, intelligence: .c, faith: .c)
-        case .poison: return WeaponScaling(strength: .none, dexterity: .none, intelligence: .none, faith: .none)
-        case .blood: return WeaponScaling(strength: .none, dexterity: .d, intelligence: .none, faith: .none)
-        case .blessed: return WeaponScaling(strength: .none, dexterity: .none, intelligence: .none, faith: .b)
-        case .hollow: return WeaponScaling(strength: .none, dexterity: .b, intelligence: .none, faith: .none)
-        }
-    }
 }
 
 struct WeaponRequirements: Codable, Hashable {
-    var strength: Int = 0
-    var dexterity: Int = 0
-    var intelligence: Int = 0
-    var faith: Int = 0
+    var strength = 0, dexterity = 0, intelligence = 0, faith = 0
+
+    init(strength: Int = 0, dexterity: Int = 0, intelligence: Int = 0, faith: Int = 0) {
+        self.strength = strength; self.dexterity = dexterity; self.intelligence = intelligence; self.faith = faith
+    }
+    init(_ values: [Int]) {
+        self.init(strength: values[safe: 0] ?? 0, dexterity: values[safe: 1] ?? 0,
+                  intelligence: values[safe: 2] ?? 0, faith: values[safe: 3] ?? 0)
+    }
 
     func requirement(for stat: StatType) -> Int {
         switch stat {
@@ -153,106 +70,191 @@ struct WeaponRequirements: Codable, Hashable {
         default: return 0
         }
     }
-
-    // Custom decoding: the bundled JSON omits zero-valued requirement keys for brevity,
-    // so every key is optional and defaults to 0.
-    enum CodingKeys: String, CodingKey { case strength, dexterity, intelligence, faith }
-    init(strength: Int = 0, dexterity: Int = 0, intelligence: Int = 0, faith: Int = 0) {
-        self.strength = strength
-        self.dexterity = dexterity
-        self.intelligence = intelligence
-        self.faith = faith
-    }
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        strength = try c.decodeIfPresent(Int.self, forKey: .strength) ?? 0
-        dexterity = try c.decodeIfPresent(Int.self, forKey: .dexterity) ?? 0
-        intelligence = try c.decodeIfPresent(Int.self, forKey: .intelligence) ?? 0
-        faith = try c.decodeIfPresent(Int.self, forKey: .faith) ?? 0
-    }
 }
 
-struct WeaponScaling: Codable, Hashable {
-    var strength: ScalingGrade = .none
-    var dexterity: ScalingGrade = .none
-    var intelligence: ScalingGrade = .none
-    var faith: ScalingGrade = .none
+/// One infusion of a melee weapon, straight from the game's params (regulation 1.35):
+/// `levels[upgrade]` = [physical, magic, fire, lightning, dark base attack,
+///                      STR, DEX, INT, FTH, LCK correction, bleed, frost, status rate].
+/// `curves` = CalcCorrectGraph id per damage type.
+struct WeaponVariant: Codable, Hashable {
+    let infusion: InfusionType
+    let requirements: WeaponRequirements
+    let curves: [Int]
+    let levels: [[Double]]
+    let notBuffable: Bool
 
-    func grade(for stat: StatType) -> ScalingGrade {
+    enum CodingKeys: String, CodingKey { case infusion, req, sat, lv, nb }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        infusion = InfusionType(rawValue: try c.decode(String.self, forKey: .infusion)) ?? .none
+        requirements = WeaponRequirements(try c.decode([Int].self, forKey: .req))
+        curves = try c.decode([Int].self, forKey: .sat)
+        levels = try c.decode([[Double]].self, forKey: .lv)
+        notBuffable = try c.decodeIfPresent(Bool.self, forKey: .nb) ?? false
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(infusion.rawValue, forKey: .infusion)
+        try c.encode([requirements.strength, requirements.dexterity, requirements.intelligence, requirements.faith], forKey: .req)
+        try c.encode(curves, forKey: .sat)
+        try c.encode(levels, forKey: .lv)
+        try c.encode(notBuffable, forKey: .nb)
+    }
+
+    func level(_ upgrade: Int) -> [Double] { levels[max(0, min(levels.count - 1, upgrade))] }
+
+    func baseDamage(at upgrade: Int) -> [Double] { Array(level(upgrade)[0..<5]) }
+
+    func grade(_ stat: StatType, at upgrade: Int) -> ScalingGrade {
+        let index: Int
         switch stat {
-        case .strength: return strength
-        case .dexterity: return dexterity
-        case .intelligence: return intelligence
-        case .faith: return faith
+        case .strength: index = 5
+        case .dexterity: index = 6
+        case .intelligence: index = 7
+        case .faith: index = 8
+        case .luck: index = 9
         default: return .none
         }
+        return ScalingGrade(correction: level(upgrade)[index])
     }
 
-    // Custom decoding: the bundled JSON omits "-"-grade scaling keys for brevity,
-    // so every key is optional and defaults to .none.
-    enum CodingKeys: String, CodingKey { case strength, dexterity, intelligence, faith }
-    init(strength: ScalingGrade = .none, dexterity: ScalingGrade = .none, intelligence: ScalingGrade = .none, faith: ScalingGrade = .none) {
-        self.strength = strength
-        self.dexterity = dexterity
-        self.intelligence = intelligence
-        self.faith = faith
-    }
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        strength = try c.decodeIfPresent(ScalingGrade.self, forKey: .strength) ?? .none
-        dexterity = try c.decodeIfPresent(ScalingGrade.self, forKey: .dexterity) ?? .none
-        intelligence = try c.decodeIfPresent(ScalingGrade.self, forKey: .intelligence) ?? .none
-        faith = try c.decodeIfPresent(ScalingGrade.self, forKey: .faith) ?? .none
+    /// Weapons with elemental base damage can't take weapon buffs, nor can rows the game marks.
+    func isBuffable(at upgrade: Int) -> Bool {
+        guard !notBuffable else { return false }
+        let base = level(upgrade)
+        return base[1] == 0 && base[2] == 0 && base[3] == 0 && base[4] == 0
     }
 }
 
-struct WeaponDamage: Codable, Hashable {
-    var physical: Double = 0
-    var magic: Double = 0
-    var fire: Double = 0
-    var lightning: Double = 0
-    var dark: Double = 0
+/// How a catalyst turns Intelligence / Faith into spell buff (EquipParamWeapon + ReinforceParamWeapon).
+struct CatalystInfo: Codable, Hashable {
+    /// [sorcery, miracle, pyromancy]
+    let schools: [Int]
+    /// CalcCorrectGraph ids for Intelligence and Faith.
+    let curves: [Int]
+    /// Per upgrade level: [Intelligence correction, Faith correction].
+    let spellBuff: [[Double]]
 
-    func value(for type: DamageType) -> Double {
-        switch type {
-        case .physical: return physical
-        case .magic: return magic
-        case .fire: return fire
-        case .lightning: return lightning
-        case .dark: return dark
+    func casts(_ school: SpellSchool) -> Bool {
+        switch school {
+        case .sorcery: return schools[safe: 0] == 1
+        case .miracle: return schools[safe: 1] == 1
+        case .pyromancy: return schools[safe: 2] == 1
+        case .item: return false
         }
-    }
-
-    // Custom decoding: the bundled JSON only lists non-zero damage types.
-    enum CodingKeys: String, CodingKey { case physical, magic, fire, lightning, dark }
-    init(physical: Double = 0, magic: Double = 0, fire: Double = 0, lightning: Double = 0, dark: Double = 0) {
-        self.physical = physical
-        self.magic = magic
-        self.fire = fire
-        self.lightning = lightning
-        self.dark = dark
-    }
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        physical = try c.decodeIfPresent(Double.self, forKey: .physical) ?? 0
-        magic = try c.decodeIfPresent(Double.self, forKey: .magic) ?? 0
-        fire = try c.decodeIfPresent(Double.self, forKey: .fire) ?? 0
-        lightning = try c.decodeIfPresent(Double.self, forKey: .lightning) ?? 0
-        dark = try c.decodeIfPresent(Double.self, forKey: .dark) ?? 0
     }
 }
 
 struct Weapon: Codable, Identifiable, Hashable {
     let id: String
     let name: String
-    let category: WeaponCategory
+    let kind: WeaponKind
+    let category: String
     let weight: Double
-    let requirements: WeaponRequirements
-    let scaling: WeaponScaling
-    let baseDamage: WeaponDamage   // at +0, Normal (uninfused)
-    let maxUpgrade: Int            // 10 for standard titanite path, 5 for special/raw-only weapons
-    let infusable: Bool
-    let poiseDamage: Double        // stagger-relevant base poise damage, flavor stat
+    let maxUpgrade: Int
+    let paired: Bool
+    let variants: [WeaponVariant]
+    let catalyst: CatalystInfo?
+    /// Non-melee items only.
+    let flatRequirements: WeaponRequirements?
+    let baseAttack: Double?
+    let absorption: Double?
+    let stability: Double?
 
-    var canTwoHand: Bool { !category.isCastingTool && !category.isShield }
+    enum CodingKeys: String, CodingKey {
+        case id, name, kind, category, weight, maxUpgrade, paired, variants, catalyst, req, baseAttack, absorption, stability
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        name = try c.decode(String.self, forKey: .name)
+        kind = try c.decode(WeaponKind.self, forKey: .kind)
+        category = try c.decode(String.self, forKey: .category)
+        weight = try c.decode(Double.self, forKey: .weight)
+        maxUpgrade = try c.decode(Int.self, forKey: .maxUpgrade)
+        paired = try c.decodeIfPresent(Bool.self, forKey: .paired) ?? false
+        variants = try c.decodeIfPresent([WeaponVariant].self, forKey: .variants) ?? []
+        catalyst = try c.decodeIfPresent(CatalystInfo.self, forKey: .catalyst)
+        flatRequirements = try c.decodeIfPresent([Int].self, forKey: .req).map(WeaponRequirements.init)
+        baseAttack = try c.decodeIfPresent(Double.self, forKey: .baseAttack)
+        absorption = try c.decodeIfPresent(Double.self, forKey: .absorption)
+        stability = try c.decodeIfPresent(Double.self, forKey: .stability)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id); try c.encode(name, forKey: .name); try c.encode(kind, forKey: .kind)
+        try c.encode(category, forKey: .category); try c.encode(weight, forKey: .weight); try c.encode(maxUpgrade, forKey: .maxUpgrade)
+    }
+
+    static func == (a: Weapon, b: Weapon) -> Bool { a.id == b.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
+
+    var hasAttackTables: Bool { !variants.isEmpty }
+    var infusable: Bool { variants.count > 1 }
+    var infusions: [InfusionType] { variants.map(\.infusion) }
+    var isCastingTool: Bool { catalyst != nil }
+    var isShield: Bool { kind == .shield }
+    var canTwoHand: Bool { kind != .catalyst && kind != .shield }
+
+    func variant(_ infusion: InfusionType) -> WeaponVariant? {
+        variants.first { $0.infusion == infusion } ?? variants.first
+    }
+
+    func requirements(_ infusion: InfusionType) -> WeaponRequirements {
+        variant(infusion)?.requirements ?? flatRequirements ?? WeaponRequirements()
+    }
+
+    /// Short community abbreviation shown on weapon cards.
+    var abbreviation: String {
+        switch category {
+        case "Dagger": return "DGR"
+        case "Straight Sword": return "SS"
+        case "Greatsword": return "GS"
+        case "Ultra Greatsword": return "UGS"
+        case "Curved Sword": return "CS"
+        case "Curved Greatsword": return "CGS"
+        case "Katana": return "KAT"
+        case "Thrusting Sword": return "TS"
+        case "Axe": return "AXE"
+        case "Greataxe": return "GA"
+        case "Hammer": return "HAM"
+        case "Great Hammer": return "GH"
+        case "Spear": return "SPR"
+        case "Pike": return "PIK"
+        case "Halberd": return "HAL"
+        case "Reaper": return "RPR"
+        case "Whip": return "WHP"
+        case "Fist": return "FST"
+        case "Claw": return "CLW"
+        case "Torch": return "TCH"
+        case "Staff": return "STF"
+        case "Sacred Chime": return "CHM"
+        case "Talisman": return "TAL"
+        case "Pyromancy Flame": return "PYR"
+        case "Small Shield": return "SH"
+        case "Medium Shield": return "SH"
+        case "Greatshield": return "GSH"
+        case "Bow": return "BOW"
+        case "Greatbow": return "GB"
+        case "Crossbow": return "XBW"
+        default: return String(category.prefix(3)).uppercased()
+        }
+    }
+
+    var tint: Color {
+        switch kind {
+        case .melee: return catalyst != nil ? .purple : .accentColor
+        case .catalyst: return .purple
+        case .shield: return .gray
+        case .bow, .greatbow, .crossbow: return .teal
+        }
+    }
+}
+
+extension Array {
+    subscript(safe index: Int) -> Element? { indices.contains(index) ? self[index] : nil }
 }

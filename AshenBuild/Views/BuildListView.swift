@@ -261,22 +261,16 @@ private struct NewBuildSheet: View {
             classID: cls.id,
             statBlock: cls.statBlock
         )
-        if cls.startingWeaponIDs.indices.contains(0) {
-            build.mainHandWeaponID = cls.startingWeaponIDs[0]
-        }
-        if cls.startingWeaponIDs.indices.contains(1) {
-            build.offHandWeaponID = cls.startingWeaponIDs[1]
-        }
+        var loadout = Loadout()
+        for (i, id) in cls.rightHand.prefix(3).enumerated() { loadout.right[i] = StoredWeapon(weaponID: id) }
+        for (i, id) in cls.leftHand.prefix(3).enumerated() { loadout.left[i] = StoredWeapon(weaponID: id) }
+        loadout.spellIDs = cls.spellIDs
+        build.loadout = loadout
         for id in cls.startingArmorIDs {
-            if let armor = dataStore.armorPiece(id) {
-                switch armor.slot {
-                case .head: build.headArmorID = id
-                case .chest: build.chestArmorID = id
-                case .hands: build.handsArmorID = id
-                case .legs: build.legsArmorID = id
-                }
-            }
+            if let armor = dataStore.armorPiece(id) { build.setArmor(id, for: armor.slot) }
         }
+        let ringSetters: [(String?) -> Void] = [{ build.ring1ID = $0 }, { build.ring2ID = $0 }, { build.ring3ID = $0 }, { build.ring4ID = $0 }]
+        for (i, id) in cls.ringIDs.prefix(4).enumerated() { ringSetters[i](id) }
         onCreate(build)
         dismiss()
     }

@@ -1,12 +1,318 @@
 [
-  {"id": "knight", "name": "Knight", "flavor": "A stalwart, well-rounded fighter clad in heavy armor.", "baseStats": {"vigor": 12, "attunement": 10, "endurance": 11, "vitality": 15, "strength": 13, "dexterity": 12, "intelligence": 9, "faith": 9, "luck": 7}, "startingWeaponIDs": ["longsword", "heater_shield"], "startingArmorIDs": ["knight_head", "knight_chest", "knight_hands", "knight_legs"]},
-  {"id": "mercenary", "name": "Mercenary", "flavor": "A quick, dual-blade duelist who favors speed over armor.", "baseStats": {"vigor": 11, "attunement": 12, "endurance": 11, "vitality": 10, "strength": 10, "dexterity": 16, "intelligence": 10, "faith": 8, "luck": 9}, "startingWeaponIDs": ["scimitar", "dagger"], "startingArmorIDs": ["mercenary_head", "mercenary_chest", "mercenary_hands", "mercenary_legs"]},
-  {"id": "warrior", "name": "Warrior", "flavor": "A brawny frontline fighter built around raw Strength.", "baseStats": {"vigor": 14, "attunement": 6, "endurance": 12, "vitality": 11, "strength": 16, "dexterity": 9, "intelligence": 8, "faith": 9, "luck": 11}, "startingWeaponIDs": ["longsword", "target_shield"], "startingArmorIDs": ["warrior_head", "warrior_chest", "warrior_hands", "warrior_legs"]},
-  {"id": "herald", "name": "Herald", "flavor": "A spear-and-faith hybrid who supports with healing miracles.", "baseStats": {"vigor": 12, "attunement": 10, "endurance": 9, "vitality": 12, "strength": 12, "dexterity": 11, "intelligence": 8, "faith": 13, "luck": 11}, "startingWeaponIDs": ["spear", "silver_knight_shield"], "startingArmorIDs": ["herald_head", "herald_chest", "herald_hands", "herald_legs"]},
-  {"id": "thief", "name": "Thief", "flavor": "A nimble, high-Luck skirmisher built around Dexterity.", "baseStats": {"vigor": 10, "attunement": 11, "endurance": 10, "vitality": 9, "strength": 9, "dexterity": 13, "intelligence": 10, "faith": 8, "luck": 14}, "startingWeaponIDs": ["dagger", "shortbow"], "startingArmorIDs": ["thief_head", "thief_chest", "thief_hands", "thief_legs"]},
-  {"id": "assassin", "name": "Assassin", "flavor": "A precise duelist built for critical, riposte-focused play.", "baseStats": {"vigor": 10, "attunement": 14, "endurance": 11, "vitality": 10, "strength": 10, "dexterity": 14, "intelligence": 11, "faith": 9, "luck": 10}, "startingWeaponIDs": ["rapier", "dagger"], "startingArmorIDs": ["assassin_head", "assassin_chest", "assassin_hands", "assassin_legs"]},
-  {"id": "sorcerer", "name": "Sorcerer", "flavor": "A frail, Intelligence-focused spellcaster.", "baseStats": {"vigor": 9, "attunement": 16, "endurance": 9, "vitality": 7, "strength": 7, "dexterity": 12, "intelligence": 16, "faith": 7, "luck": 12}, "startingWeaponIDs": ["sorcerers_staff", "dagger"], "startingArmorIDs": ["sorcerer_head", "sorcerer_chest", "sorcerer_hands", "sorcerer_legs"]},
-  {"id": "pyromancer", "name": "Pyromancer", "flavor": "A hybrid melee/fire-sorcery caster, scaling INT and FAI evenly.", "baseStats": {"vigor": 11, "attunement": 12, "endurance": 10, "vitality": 8, "strength": 12, "dexterity": 9, "intelligence": 14, "faith": 14, "luck": 7}, "startingWeaponIDs": ["hand_axe", "pyromancy_flame"], "startingArmorIDs": ["pyromancer_head", "pyromancer_chest", "pyromancer_hands", "pyromancer_legs"]},
-  {"id": "cleric", "name": "Cleric", "flavor": "A Faith-focused miracle caster with solid melee backup.", "baseStats": {"vigor": 10, "attunement": 14, "endurance": 9, "vitality": 7, "strength": 12, "dexterity": 8, "intelligence": 7, "faith": 16, "luck": 13}, "startingWeaponIDs": ["mace", "caduceus_round_shield"], "startingArmorIDs": ["cleric_head", "cleric_chest", "cleric_hands", "cleric_legs"]},
-  {"id": "deprived", "name": "Deprived", "flavor": "Nothing but a club and a shield. Every stat starts equal — a blank slate.", "baseStats": {"vigor": 10, "attunement": 10, "endurance": 10, "vitality": 10, "strength": 10, "dexterity": 10, "intelligence": 10, "faith": 10, "luck": 10}, "startingWeaponIDs": ["club", "target_shield"], "startingArmorIDs": []}
+ {
+  "id": "knight",
+  "name": "Knight",
+  "flavor": "A stalwart, well-rounded fighter clad in heavy armor.",
+  "baseStats": {
+   "vigor": 12,
+   "attunement": 10,
+   "endurance": 11,
+   "vitality": 15,
+   "strength": 13,
+   "dexterity": 12,
+   "intelligence": 9,
+   "faith": 9,
+   "luck": 7
+  },
+  "startingArmorIDs": [
+   "knight_helm",
+   "knight_armor",
+   "knight_gauntlets",
+   "knight_leggings"
+  ],
+  "rightHand": [
+   "longsword"
+  ],
+  "leftHand": [
+   "knight_shield"
+  ],
+  "spellIDs": [],
+  "ringIDs": []
+ },
+ {
+  "id": "mercenary",
+  "name": "Mercenary",
+  "flavor": "A quick, dual-blade duelist who favors speed over armor.",
+  "baseStats": {
+   "vigor": 11,
+   "attunement": 12,
+   "endurance": 11,
+   "vitality": 10,
+   "strength": 10,
+   "dexterity": 16,
+   "intelligence": 10,
+   "faith": 8,
+   "luck": 9
+  },
+  "startingArmorIDs": [
+   "sellsword_helm",
+   "sellsword_armor",
+   "sellsword_trousers"
+  ],
+  "rightHand": [
+   "sellsword_twinblades"
+  ],
+  "leftHand": [
+   "wooden_shield"
+  ],
+  "spellIDs": [],
+  "ringIDs": []
+ },
+ {
+  "id": "warrior",
+  "name": "Warrior",
+  "flavor": "A brawny frontline fighter built around raw Strength.",
+  "baseStats": {
+   "vigor": 14,
+   "attunement": 6,
+   "endurance": 12,
+   "vitality": 11,
+   "strength": 16,
+   "dexterity": 9,
+   "intelligence": 8,
+   "faith": 9,
+   "luck": 11
+  },
+  "startingArmorIDs": [
+   "northern_helm",
+   "northern_armor",
+   "northern_gloves",
+   "northern_trousers"
+  ],
+  "rightHand": [
+   "battle_axe"
+  ],
+  "leftHand": [
+   "round_shield"
+  ],
+  "spellIDs": [],
+  "ringIDs": []
+ },
+ {
+  "id": "herald",
+  "name": "Herald",
+  "flavor": "A spear-and-faith hybrid who supports with healing miracles.",
+  "baseStats": {
+   "vigor": 12,
+   "attunement": 10,
+   "endurance": 9,
+   "vitality": 12,
+   "strength": 12,
+   "dexterity": 11,
+   "intelligence": 8,
+   "faith": 13,
+   "luck": 11
+  },
+  "startingArmorIDs": [
+   "herald_helm",
+   "herald_armor",
+   "herald_gloves",
+   "herald_trousers"
+  ],
+  "rightHand": [
+   "spear"
+  ],
+  "leftHand": [
+   "kite_shield",
+   "talisman"
+  ],
+  "spellIDs": [
+   "heal_aid"
+  ],
+  "ringIDs": []
+ },
+ {
+  "id": "thief",
+  "name": "Thief",
+  "flavor": "A nimble, high-Luck skirmisher built around Dexterity.",
+  "baseStats": {
+   "vigor": 10,
+   "attunement": 11,
+   "endurance": 10,
+   "vitality": 9,
+   "strength": 9,
+   "dexterity": 13,
+   "intelligence": 10,
+   "faith": 8,
+   "luck": 14
+  },
+  "startingArmorIDs": [
+   "thief_mask",
+   "deserter_armor",
+   "deserter_trousers"
+  ],
+  "rightHand": [
+   "bandit_s_knife",
+   "short_bow"
+  ],
+  "leftHand": [
+   "iron_round_shield"
+  ],
+  "spellIDs": [],
+  "ringIDs": []
+ },
+ {
+  "id": "assassin",
+  "name": "Assassin",
+  "flavor": "A precise duelist built for critical, riposte-focused play.",
+  "baseStats": {
+   "vigor": 10,
+   "attunement": 14,
+   "endurance": 11,
+   "vitality": 10,
+   "strength": 10,
+   "dexterity": 14,
+   "intelligence": 11,
+   "faith": 9,
+   "luck": 10
+  },
+  "startingArmorIDs": [
+   "assassin_hood",
+   "assassin_armor",
+   "assassin_gloves",
+   "assassin_trousers"
+  ],
+  "rightHand": [
+   "estoc"
+  ],
+  "leftHand": [
+   "target_shield",
+   "sorcerer_s_staff"
+  ],
+  "spellIDs": [
+   "spook"
+  ],
+  "ringIDs": []
+ },
+ {
+  "id": "sorcerer",
+  "name": "Sorcerer",
+  "flavor": "A frail, Intelligence-focused spellcaster.",
+  "baseStats": {
+   "vigor": 9,
+   "attunement": 16,
+   "endurance": 9,
+   "vitality": 7,
+   "strength": 7,
+   "dexterity": 12,
+   "intelligence": 16,
+   "faith": 7,
+   "luck": 12
+  },
+  "startingArmorIDs": [
+   "sorcerer_hood",
+   "sorcerer_robe",
+   "sorcerer_gloves",
+   "sorcerer_trousers"
+  ],
+  "rightHand": [
+   "mail_breaker"
+  ],
+  "leftHand": [
+   "leather_shield",
+   "sorcerer_s_staff"
+  ],
+  "spellIDs": [
+   "soul_arrow",
+   "heavy_soul_arrow"
+  ],
+  "ringIDs": [
+   "young_dragon_ring"
+  ]
+ },
+ {
+  "id": "pyromancer",
+  "name": "Pyromancer",
+  "flavor": "A hybrid melee/fire-sorcery caster, scaling INT and FAI evenly.",
+  "baseStats": {
+   "vigor": 11,
+   "attunement": 12,
+   "endurance": 10,
+   "vitality": 8,
+   "strength": 12,
+   "dexterity": 9,
+   "intelligence": 14,
+   "faith": 14,
+   "luck": 7
+  },
+  "startingArmorIDs": [
+   "pyromancer_crown",
+   "pyromancer_garb",
+   "pyromancer_wrap",
+   "pyromancer_trousers"
+  ],
+  "rightHand": [
+   "hand_axe"
+  ],
+  "leftHand": [
+   "caduceus_round_shield",
+   "pyromancy_flame"
+  ],
+  "spellIDs": [
+   "fireball"
+  ],
+  "ringIDs": [
+   "great_swamp_ring"
+  ]
+ },
+ {
+  "id": "cleric",
+  "name": "Cleric",
+  "flavor": "A Faith-focused miracle caster with solid melee backup.",
+  "baseStats": {
+   "vigor": 10,
+   "attunement": 14,
+   "endurance": 9,
+   "vitality": 7,
+   "strength": 12,
+   "dexterity": 8,
+   "intelligence": 7,
+   "faith": 16,
+   "luck": 13
+  },
+  "startingArmorIDs": [
+   "cleric_blue_robe",
+   "cleric_gloves",
+   "cleric_trousers"
+  ],
+  "rightHand": [
+   "mace"
+  ],
+  "leftHand": [
+   "blue_wooden_shield",
+   "cleric_s_sacred_chime"
+  ],
+  "spellIDs": [
+   "heal",
+   "force"
+  ],
+  "ringIDs": []
+ },
+ {
+  "id": "deprived",
+  "name": "Deprived",
+  "flavor": "Nothing but a club and a shield. Every stat starts equal \u2014 a blank slate.",
+  "baseStats": {
+   "vigor": 10,
+   "attunement": 10,
+   "endurance": 10,
+   "vitality": 10,
+   "strength": 10,
+   "dexterity": 10,
+   "intelligence": 10,
+   "faith": 10,
+   "luck": 10
+  },
+  "startingArmorIDs": [
+   "loincloth_legs"
+  ],
+  "rightHand": [
+   "club"
+  ],
+  "leftHand": [
+   "plank_shield"
+  ],
+  "spellIDs": [],
+  "ringIDs": []
+ }
 ]

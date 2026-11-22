@@ -2,6 +2,7 @@ import SwiftUI
 
 /// Two-column grid of label/value pairs, used for the defense and resistance tables.
 struct DefenseGrid: View {
+    var percent = false
     let items: [(label: String, value: Double)]
 
     private let columns = [GridItem(.flexible(), spacing: 24), GridItem(.flexible(), spacing: 24)]
@@ -13,7 +14,7 @@ struct DefenseGrid: View {
                     Text(item.label)
                         .foregroundStyle(.secondary)
                     Spacer(minLength: 4)
-                    Text(item.value, format: .number.precision(.fractionLength(0)))
+                    Text(percent ? "\(item.value.oneDecimal)%" : "\(item.value.whole)")
                         .monospacedDigit()
                         .fontWeight(.medium)
                 }

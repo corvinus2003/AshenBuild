@@ -30,12 +30,26 @@ struct SummaryTab: View {
                 Text("\(Int((report.loadFraction * 100).rounded()))% of capacity. \(report.rollTier.rawValue) is \(report.rollTier.thresholdDescription).")
             }
 
-            Section("Attack Rating") {
-                if let main = report.mainHand { weaponRow(main, hand: "Main Hand", hp: report.hp) }
-                if let off = report.offHand { weaponRow(off, hand: "Off Hand", hp: report.hp) }
-                if report.mainHand == nil && report.offHand == nil {
-                    Text("No weapons equipped").foregroundStyle(.secondary)
+            Section {
+                HandSwitcher(build: build, hand: .right)
+                if let main = report.mainHand { weaponRow(main, hand: "Right Hand", hp: report.hp) }
+                HandSwitcher(build: build, hand: .left)
+                if let off = report.offHand { weaponRow(off, hand: "Left Hand", hp: report.hp) }
+            } header: {
+                Text("Weapons Held")
+            } footer: {
+                Text("Tap a slot to hold that weapon. Attack rating, requirements and the optimizer follow it.")
+            }
+
+            Section {
+                BuffPicker(build: build)
+                if report.buffStatus != .none {
+                    Label(buffStatusText(report), systemImage: report.buffStatus == .applied ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(report.buffStatus == .applied ? Color.green : Color.orange)
                 }
+            } header: {
+                Text("Weapon Buff")
             }
 
             if !ringEffects.isEmpty {
@@ -60,16 +74,20 @@ struct SummaryTab: View {
                 }
             }
 
-            Section("Physical Defense") {
-                DefenseGrid(items: [
+            Section {
+                DefenseGrid(percent: true, items: [
                     ("Standard", report.physicalDefense.standard), ("Strike", report.physicalDefense.strike),
                     ("Slash", report.physicalDefense.slash), ("Thrust", report.physicalDefense.thrust),
-                    ("Poise", report.poise),
                 ])
+                LabeledContent("Poise") { Text(report.poise.oneDecimal).monospacedDigit() }
+            } header: {
+                Text("Physical Absorption")
+            } footer: {
+                Text("Armor absorptions multiply together, as in the game.")
             }
 
-            Section("Elemental Defense") {
-                DefenseGrid(items: [
+            Section("Elemental Absorption") {
+                DefenseGrid(percent: true, items: [
                     ("Magic", report.elementalDefense.magic), ("Fire", report.elementalDefense.fire),
                     ("Lightning", report.elementalDefense.lightning), ("Dark", report.elementalDefense.dark),
                 ])
@@ -89,13 +107,27 @@ struct SummaryTab: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(report.weapon.name)
-                    Text(hand)
+                    Text("+\(report.setup.upgrade)\(report.weapon.infusable ? " " + report.setup.infusion.displayName : "")\(report.setup.twoHanded && report.weapon.canTwoHand ? " · two-handed" : "")")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
-                Text("\(report.total.whole)")
-                    .font(.title3.weight(.semibold).monospacedDigit())
+                VStack(alignment: .trailing, spacing: 0) {
+                    Text("\(report.total.whole)")
+                        .font(.title3.weight(.semibold).monospacedDigit())
+                        .foregroundStyle(report.result.meetsRequirements ? Color.primary : Color.orange)
+                    Text(report.weapon.hasAttackTables ? "AR" : "ATK").font(.caption2).foregroundStyle(.secondary)
+                }
+            }
+            if !report.result.meetsRequirements {
+                Text("Requirements not met: far less damage in the game")
+                    .font(.footnote)
+                    .foregroundStyle(.orange)
+            }
+            if let buff = report.buffApplied {
+                Text("\(buff.name) +\(report.buffGain.whole)")
+                    .font(.footnote)
+                    .foregroundStyle(.green)
             }
             ForEach(report.conditional, id: \.ring.id) { item in
                 HStack {
@@ -112,10 +144,85 @@ struct SummaryTab: View {
         .accessibilityElement(children: .combine)
     }
 
+    private func buffStatusText(_ report: BuildReport) -> String {
+        switch report.buffStatus {
+        case .applied: return "Applied to \(report.mainHand?.weapon.name ?? "your weapon")"
+        case .notBuffable: return "\(report.mainHand?.weapon.name ?? "This weapon") can't be buffed (it already has elemental damage, or the game doesn't allow it)"
+        case .cannotCast: return "Your Intelligence or Faith is below the spell's requirement"
+        case .noCatalyst: return "No equipped catalyst can cast this spell"
+        case .none: return ""
+        }
+    }
+
     private func conditionLabel(_ ring: Ring, hp: Int) -> String {
         guard let boost = ring.conditionalAttack else { return ring.family }
         var text = "\(ring.family), \(boost.label)"
         if let threshold = boost.hpThreshold { text += " (≤ \(Int((Double(hp) * threshold).rounded(.down))) HP)" }
         return text
+    }
+}
+
+/// Tap one of the three slots of a hand to hold it.
+struct HandSwitcher: View {
+    @Bindable var build: SavedBuild
+    let hand: Hand
+    @Environment(DataStore.self) private var dataStore
+
+    var body: some View {
+        let loadout = build.loadout
+        let slots = hand == .right ? loadout.right : loadout.left
+        let active = hand == .right ? loadout.activeRight : loadout.activeLeft
+        VStack(alignment: .leading, spacing: 6) {
+            Text(hand.rawValue).font(.footnote).foregroundStyle(.secondary)
+            HStack(spacing: 6) {
+                ForEach(0..<3, id: \.self) { i in
+                    let weapon = dataStore.weapon(slots[i].weaponID)
+                    Button {
+                        var l = build.loadout
+                        if hand == .right { l.activeRight = i } else { l.activeLeft = i }
+                        build.loadout = l
+                    } label: {
+                        Text(weapon?.name ?? "Empty")
+                            .font(.caption.weight(.medium))
+                            .lineLimit(2)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, minHeight: 34)
+                            .padding(.horizontal, 4)
+                            .foregroundStyle(i == active ? Color.white : (weapon == nil ? Color.secondary : Color.primary))
+                            .background(i == active ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(Color(.tertiarySystemFill)),
+                                        in: .rect(cornerRadius: 9, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(weapon == nil && i != active)
+                    .accessibilityAddTraits(i == active ? .isSelected : [])
+                }
+            }
+        }
+        .padding(.vertical, 2)
+        .sensoryFeedback(.selection, trigger: active)
+    }
+}
+
+/// Choose the weapon buff (spells that buff weapons, and resins).
+struct BuffPicker: View {
+    @Bindable var build: SavedBuild
+    @Environment(DataStore.self) private var dataStore
+
+    var body: some View {
+        let buffs = dataStore.spells.filter(\.isWeaponBuff)
+        Picker("Buff", selection: Binding(
+            get: { build.loadout.buffID ?? "" },
+            set: { v in var l = build.loadout; l.buffID = v.isEmpty ? nil : v; build.loadout = l }
+        )) {
+            Text("None").tag("")
+            ForEach(SpellSchool.allCases) { school in
+                let list = buffs.filter { $0.school == school }
+                if !list.isEmpty {
+                    Section(school.displayName) {
+                        ForEach(list) { Text($0.name).tag($0.id) }
+                    }
+                }
+            }
+        }
     }
 }

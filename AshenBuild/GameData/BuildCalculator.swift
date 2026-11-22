@@ -1,6 +1,6 @@
 import Foundation
 
-/// One hand's weapon choice.
+/// One weapon choice (a slot's contents).
 struct WeaponSetup: Hashable {
     var weaponID: String?
     var upgrade: Int = 0
@@ -13,20 +13,50 @@ struct WeaponSetup: Hashable {
 struct BuildSpec: Hashable {
     var classID: String
     var stats: StatBlock                 // points the player allocated (drives Soul Level)
-    var mainHand = WeaponSetup()
-    var offHand = WeaponSetup()
+    var loadout = Loadout()
     var armor: [ArmorSlot: String] = [:]
     var ringIDs: [String] = []
+
+    /// The active right-hand weapon (what the optimizer and the summary focus on).
+    var mainHand: WeaponSetup {
+        get {
+            var s = loadout.right[loadout.activeRight].setup
+            s.twoHanded = loadout.twoHanded
+            return s
+        }
+        set {
+            loadout.right[loadout.activeRight] = StoredWeapon(weaponID: newValue.weaponID, upgrade: newValue.upgrade,
+                                                              infusion: newValue.infusion.rawValue)
+            loadout.twoHanded = newValue.twoHanded
+        }
+    }
+
+    var offHand: WeaponSetup { loadout.left[loadout.activeLeft].setup }
+
+    /// Every equipped weapon (all six slots), for weight and catalysts.
+    var allWeapons: [WeaponSetup] { (loadout.right + loadout.left).map(\.setup).filter { $0.weaponID != nil } }
 }
 
-/// Attack rating for one hand, with ring effects applied.
+/// Attack rating for one hand, with buffs and rings applied.
 struct WeaponReport {
     let weapon: Weapon
     let setup: WeaponSetup
-    let result: Formulas.AttackRatingResult   // breakdown includes always-on ring boosts
+    let result: Formulas.AttackRatingResult   // breakdown includes the weapon buff and always-on ring boosts
     let total: Double
     /// Situational totals, one per ring with a conditional boost (Red Tearstone, Lloyd's…).
     let conditional: [(ring: Ring, total: Double)]
+    /// The buff that was applied, if any, and what it added.
+    let buffApplied: Spell?
+    let buffGain: Double
+}
+
+/// Why a chosen weapon buff does or doesn't apply.
+enum BuffStatus: Equatable {
+    case none
+    case applied
+    case notBuffable          // weapon has elemental damage or the game forbids it
+    case cannotCast           // stats below the spell's requirement
+    case noCatalyst           // no equipped catalyst of the spell's school
 }
 
 /// Everything the app shows about a build, computed in one place.
@@ -34,8 +64,8 @@ struct BuildReport {
     let spec: BuildSpec
     let rings: [Ring]
     let armorPieces: [ArmorPiece]
-    let baseStats: StatBlock         // the starting class floor
-    let effectiveStats: StatBlock    // allocated + ring bonuses (Knight's Ring, Prisoner's Chain…)
+    let baseStats: StatBlock
+    let effectiveStats: StatBlock
     let soulLevel: Int
     let hp: Int
     let fp: Int
@@ -51,6 +81,9 @@ struct BuildReport {
     let absorption: [DamageType: Double]
     let mainHand: WeaponReport?
     let offHand: WeaponReport?
+    /// Best spell buff per school from the equipped catalysts, with the catalyst's name.
+    let spellBuffs: [SpellSchool: (value: Int, catalyst: String)]
+    let buffStatus: BuffStatus
 
     var loadFraction: Double { capacity > 0 ? load / capacity : 0 }
     var rollTier: Formulas.RollTier { Formulas.rollTier(loadPercent: loadFraction) }
@@ -69,7 +102,6 @@ enum BuildCalculator {
         let hpMultiplier = rings.reduce(1.0) { $0 * $1.hpMultiplier }
         let staminaMultiplier = rings.reduce(1.0) { $0 * $1.staminaMultiplier }
         let loadMultiplier = rings.reduce(1.0) { $0 * $1.equipLoadMultiplier }
-
         let load = totalWeight(spec: spec, rings: rings, pieces: pieces, data: data)
 
         var absorption: [DamageType: Double] = [:]
@@ -79,6 +111,10 @@ enum BuildCalculator {
             }
         }
 
+        let spellBuffs = self.spellBuffs(spec: spec, stats: effective, data: data)
+        let buff = data.spell(spec.loadout.buffID)
+        let (main, status) = weaponReportWithBuff(spec.mainHand, buff: buff, effective: effective, rings: rings,
+                                                   load: load, spellBuffs: spellBuffs, data: data)
         return BuildReport(
             spec: spec,
             rings: rings,
@@ -97,10 +133,10 @@ enum BuildCalculator {
             elementalDefense: Formulas.totalElementalDefense(pieces: pieces),
             resistances: Formulas.totalResistances(pieces: pieces),
             absorption: absorption,
-            mainHand: weaponReport(spec.mainHand, effective: effective, rings: rings, load: load, data: data),
-            offHand: weaponReport(WeaponSetup(weaponID: spec.offHand.weaponID, upgrade: spec.offHand.upgrade,
-                                              infusion: spec.offHand.infusion, twoHanded: false),
-                                  effective: effective, rings: rings, load: load, data: data)
+            mainHand: main,
+            offHand: weaponReport(spec.offHand, effective: effective, rings: rings, load: load, data: data),
+            spellBuffs: spellBuffs,
+            buffStatus: status
         )
     }
 
@@ -113,22 +149,65 @@ enum BuildCalculator {
         return effective
     }
 
+    /// All six weapon slots count toward equip load, as in the game.
     static func totalWeight(spec: BuildSpec, rings: [Ring], pieces: [ArmorPiece], data: DataStore) -> Double {
-        let weapons = (data.weapon(spec.mainHand.weaponID)?.weight ?? 0) + (data.weapon(spec.offHand.weaponID)?.weight ?? 0)
+        let weapons = spec.allWeapons.reduce(0.0) { $0 + (data.weapon($1.weaponID)?.weight ?? 0) }
         return weapons + pieces.reduce(0) { $0 + $1.weight } + rings.reduce(0) { $0 + $1.weight }
     }
 
+    /// The strongest equipped catalyst for each school whose requirements are met.
+    static func spellBuffs(spec: BuildSpec, stats: StatBlock, data: DataStore) -> [SpellSchool: (value: Int, catalyst: String)] {
+        var best: [SpellSchool: (value: Int, catalyst: String)] = [:]
+        for setup in spec.allWeapons {
+            guard let w = data.weapon(setup.weaponID), let cat = w.catalyst else { continue }
+            let req = w.requirements(setup.infusion)
+            guard stats[.strength] >= req.strength, stats[.intelligence] >= req.intelligence, stats[.faith] >= req.faith else { continue }
+            let value = Formulas.spellBuff(of: w, upgrade: setup.upgrade, stats: stats)
+            for school in [SpellSchool.sorcery, .miracle, .pyromancy] where cat.casts(school) {
+                if value > (best[school]?.value ?? 0) { best[school] = (value, w.name) }
+            }
+        }
+        return best
+    }
+
     static func weaponReport(_ setup: WeaponSetup, effective: StatBlock, rings: [Ring], load: Double, data: DataStore) -> WeaponReport? {
-        guard let weapon = data.weapon(setup.weaponID) else { return nil }
+        weaponReportWithBuff(setup, buff: nil, effective: effective, rings: rings, load: load, spellBuffs: [:], data: data).0
+    }
+
+    static func weaponReportWithBuff(_ setup: WeaponSetup, buff: Spell?, effective: StatBlock, rings: [Ring], load: Double,
+                                     spellBuffs: [SpellSchool: (value: Int, catalyst: String)], data: DataStore) -> (WeaponReport?, BuffStatus) {
+        guard let weapon = data.weapon(setup.weaponID) else { return (nil, buff == nil ? .none : .notBuffable) }
         var result = Formulas.attackRating(
-            for: Formulas.WeaponInstance(
-                weapon: weapon,
-                upgradeLevel: setup.upgrade,
-                infusion: weapon.infusable ? setup.infusion : .none,
-                twoHanded: setup.twoHanded && weapon.canTwoHand
-            ),
+            for: Formulas.WeaponInstance(weapon: weapon, upgradeLevel: setup.upgrade, infusion: setup.infusion,
+                                         twoHanded: setup.twoHanded && weapon.canTwoHand),
             stats: effective
         )
+
+        // Weapon buff (SpEffectParam values as measured by the community calculators).
+        var status = BuffStatus.none
+        var gain = 0.0
+        if let buff, let effect = buff.buff {
+            let variant = weapon.variant(setup.infusion)
+            if variant == nil || !(variant!.isBuffable(at: setup.upgrade)) {
+                status = .notBuffable
+            } else if buff.school != .item && !buff.canCast(effective) {
+                status = .cannotCast
+            } else if buff.school != .item && effect.percentOfSpellBuff != nil && spellBuffs[buff.school] == nil {
+                status = .noCatalyst
+            } else {
+                status = .applied
+                let before = result.breakdown.values.reduce(0, +)
+                if let multiplier = effect.physicalMultiplier {
+                    let k = weapon.paired ? 1 + (multiplier - 1) * 0.8 : multiplier
+                    result.breakdown[.physical] = (result.breakdown[.physical] ?? 0) * k
+                } else if let flat = effect.flat {
+                    result.breakdown[effect.damageType, default: 0] += flat * (weapon.paired ? 0.826 : 1)
+                } else if let percent = effect.percentOfSpellBuff {
+                    result.breakdown[effect.damageType, default: 0] += percent / 100 * Double(spellBuffs[buff.school]?.value ?? 0)
+                }
+                gain = result.breakdown.values.reduce(0, +) - before
+            }
+        }
 
         // Always-on ring boosts: clutch rings (per element) and Flynn's Ring (physical, by weight).
         for ring in rings {
@@ -147,7 +226,9 @@ enum BuildCalculator {
             guard let boost = ring.conditionalAttack else { return nil }
             return (ring, result.total * (1 + boost.percent / 100))
         }
-        return WeaponReport(weapon: weapon, setup: setup, result: result, total: result.total, conditional: conditional)
+        let report = WeaponReport(weapon: weapon, setup: setup, result: result, total: result.total, conditional: conditional,
+                                  buffApplied: status == .applied ? buff : nil, buffGain: gain)
+        return (report, status)
     }
 
     /// Flynn's Ring physical bonus in percent by carried weight (Fextralife: ~15% under 2.4,
@@ -222,10 +303,7 @@ extension SavedBuild {
         BuildSpec(
             classID: classID,
             stats: statBlock,
-            mainHand: WeaponSetup(weaponID: mainHandWeaponID, upgrade: mainHandUpgradeLevel,
-                                  infusion: InfusionType(rawValue: mainHandInfusion) ?? .none, twoHanded: twoHanded),
-            offHand: WeaponSetup(weaponID: offHandWeaponID, upgrade: offHandUpgradeLevel,
-                                 infusion: InfusionType(rawValue: offHandInfusion) ?? .none),
+            loadout: loadout,
             armor: [.head: headArmorID, .chest: chestArmorID, .hands: handsArmorID, .legs: legsArmorID].compactMapValues { $0 },
             ringIDs: ringIDs
         )
@@ -241,12 +319,11 @@ extension SavedBuild {
         updatedAt = .now
     }
 
+    /// Replaces the active right-hand weapon.
     func setMainHand(_ setup: WeaponSetup) {
-        mainHandWeaponID = setup.weaponID
-        mainHandUpgradeLevel = setup.upgrade
-        mainHandInfusion = setup.infusion.rawValue
-        twoHanded = setup.twoHanded
-        updatedAt = .now
+        var spec = self.spec
+        spec.mainHand = setup
+        loadout = spec.loadout
     }
 }
 

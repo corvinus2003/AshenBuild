@@ -69,7 +69,7 @@ private struct ArmorSlotRow: View {
             ArmorPicker(slot: slot, selectedID: armorID, onSelect: onSelect)
         } label: {
             SlotLabel(slot: slot.displayName, name: piece?.name, detail: piece.map {
-                ["\($0.weight.oneDecimal) wt", "\($0.physicalDefense.standard.whole) phys", "\($0.poise.oneDecimal) poise"]
+                ["\($0.weight.oneDecimal) wt", "\($0.physicalDefense.standard.oneDecimal)% phys", "\($0.poise.oneDecimal) poise"]
             } ?? [])
         }
     }

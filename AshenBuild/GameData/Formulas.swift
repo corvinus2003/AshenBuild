@@ -38,18 +38,30 @@ enum Formulas {
     // MARK: - Vigor -> HP
 
     private static let hpTable: [(x: Int, y: Double)] = [
-        // Fextralife DS3 Vigor table (10-99). Below 10 is extrapolated; no class starts under 9.
-        (1, 300), (10, 403), (15, 550), (20, 764), (25, 947), (27, 1000), (30, 1056),
-        (35, 1141), (40, 1213), (45, 1269), (50, 1300), (55, 1312), (60, 1323),
-        (70, 1346), (80, 1367), (90, 1386), (99, 1400)
+        // Fextralife DS3 Vigor table, every level 10-99. No class starts below Vigor 9.
+        (1, 300), (10, 403), (11, 427), (12, 454), (13, 483), (14, 515), (15, 550), (16, 594), (17, 638),
+        (18, 681), (19, 723), (20, 764), (21, 804), (22, 842), (23, 879), (24, 914), (25, 947),
+        (26, 977), (27, 1000), (28, 1019), (29, 1038), (30, 1056), (31, 1074), (32, 1092), (33, 1109),
+        (34, 1125), (35, 1141), (36, 1157), (37, 1172), (38, 1186), (39, 1200), (40, 1213), (41, 1226),
+        (42, 1238), (43, 1249), (44, 1260), (45, 1269), (46, 1278), (47, 1285), (48, 1292), (49, 1297),
+        (50, 1300), (51, 1302), (52, 1304), (53, 1307), (54, 1309), (55, 1312), (56, 1314), (57, 1316),
+        (58, 1319), (59, 1321), (60, 1323), (61, 1326), (62, 1328), (63, 1330), (64, 1333), (65, 1335),
+        (66, 1337), (67, 1340), (68, 1342), (69, 1344), (70, 1346), (71, 1348), (72, 1351), (73, 1353),
+        (74, 1355), (75, 1357), (76, 1359), (77, 1361), (78, 1363), (79, 1365), (80, 1367), (81, 1369),
+        (82, 1371), (83, 1373), (84, 1375), (85, 1377), (86, 1379), (87, 1381), (88, 1383), (89, 1385),
+        (90, 1386), (91, 1388), (92, 1390), (93, 1391), (94, 1393), (95, 1395), (96, 1396), (97, 1397),
+        (98, 1399), (99, 1400)
     ]
     static func hp(vigor: Int) -> Int { Int(interpolate(hpTable, at: vigor).rounded()) }
 
     // MARK: - Attunement -> FP & attunement slots
 
     private static let fpTable: [(x: Int, y: Double)] = [
-        // Fextralife DS3 Attunement table. Below 10 is extrapolated.
-        (1, 44), (10, 93), (15, 120), (20, 150), (25, 189), (27, 206), (30, 233), (35, 280),
+        // Fextralife DS3 Attunement table: every level 10-35, then the listed points.
+        (1, 44), (10, 93), (11, 98), (12, 103), (13, 109), (14, 114), (15, 120), (16, 124), (17, 130),
+        (18, 136), (19, 143), (20, 150), (21, 157), (22, 165), (23, 173), (24, 181), (25, 189),
+        (26, 198), (27, 206), (28, 215), (29, 224), (30, 233), (31, 242), (32, 251), (33, 260),
+        (34, 270), (35, 280),
         (50, 324), (60, 350), (70, 377), (80, 404), (90, 430), (99, 450)
     ]
     static func fp(attunement: Int) -> Int { Int(interpolate(fpTable, at: attunement).rounded()) }
@@ -66,9 +78,13 @@ enum Formulas {
     // MARK: - Endurance -> Stamina
 
     private static let staminaTable: [(x: Int, y: Double)] = [
-        // Fextralife DS3 Endurance table (10-50). Past 50 it barely grows.
-        (1, 85), (10, 94), (15, 102), (20, 112), (25, 122), (27, 127), (30, 134),
-        (35, 146), (40, 160), (50, 161), (99, 170)
+        // Fextralife DS3 Endurance table, every level 9-41; flat to 49, then +10 by 99.
+        (1, 85), (9, 92), (10, 94), (11, 95), (12, 97), (13, 98), (14, 100), (15, 102), (16, 104),
+        (17, 106), (18, 108), (19, 110), (20, 112), (21, 114), (22, 116), (23, 118), (24, 120),
+        (25, 122), (26, 125), (27, 127), (28, 129), (29, 132), (30, 134), (31, 136), (32, 139),
+        (33, 141), (34, 144), (35, 146), (36, 149), (37, 152), (38, 154), (39, 157), (40, 160),
+        (41, 160),
+        (49, 160), (50, 161), (99, 170)
     ]
     static func stamina(endurance: Int) -> Int { Int(interpolate(staminaTable, at: endurance).rounded()) }
 
@@ -115,25 +131,15 @@ enum Formulas {
         return .fast
     }
 
-    // MARK: - Stat scaling curve (0...1 fraction of a grade's multiplierAt99, by raw stat value)
+    // MARK: - Attack Rating (game params, regulation 1.35)
 
-    private static let scalingCurveTable: [(x: Int, y: Double)] = [
-        (1, 0.0), (20, 0.35), (40, 0.62), (60, 0.80), (80, 0.93), (99, 1.0)
-    ]
-    static func scalingCurve(statValue: Int) -> Double { interpolate(scalingCurveTable, at: statValue) }
+    /// CalcCorrectGraph curves by id, 0...99 -> percent of the correction that applies.
+    static var curves: [Int: [Double]] { DataStore.shared.curves }
 
-    // MARK: - Weapon upgrade growth
-
-    /// Fractional growth toward the upgrade path's max, applied to base damage.
-    /// e.g. a standard +10 weapon deals roughly 2.3x its +0 base physical damage.
-    static func upgradeMultiplier(level: Int, maxUpgrade: Int) -> Double {
-        guard maxUpgrade > 0 else { return 1.0 }
-        let fraction = Double(max(0, min(level, maxUpgrade))) / Double(maxUpgrade)
-        let growthFactor = 1.3
-        return 1.0 + growthFactor * fraction
+    static func curveValue(_ id: Int, _ stat: Int) -> Double {
+        guard let curve = curves[id] else { return 0 }
+        return curve[max(0, min(curve.count - 1, stat))] / 100
     }
-
-    // MARK: - Attack Rating
 
     struct WeaponInstance {
         var weapon: Weapon
@@ -146,102 +152,79 @@ enum Formulas {
         var breakdown: [DamageType: Double]
         var total: Double
         var meetsRequirements: Bool
-        var requirementRatio: Double // 1.0 = fully met, <1.0 = underleveled penalty applied
+        /// Stats below the weapon's requirements (two-handing counted).
+        var missing: [StatType]
     }
 
+    /// Attack rating as the game computes it from EquipParamWeapon, ReinforceParamWeapon and
+    /// CalcCorrectGraph: each damage type = base x (1 + sum of correction x curve(stat)).
+    /// Physical scales with STR, DEX (and Luck for Hollow; Faith for Blessed), magic with INT,
+    /// fire with INT and FTH, lightning with FTH, dark with INT and FTH. Two-handing counts
+    /// Strength x1.5. The number assumes the requirements are met; `missing` says when not.
     static func attackRating(for instance: WeaponInstance, stats: StatBlock) -> AttackRatingResult {
         let weapon = instance.weapon
+        let twoHand = instance.twoHanded && weapon.canTwoHand
+        let str = twoHand ? min(Int((Double(stats[.strength]) * 1.5).rounded(.down)), 99) : stats[.strength]
+        let req = weapon.requirements(instance.infusion)
+        var missing: [StatType] = []
+        if str < req.strength { missing.append(.strength) }
+        if stats[.dexterity] < req.dexterity { missing.append(.dexterity) }
+        if stats[.intelligence] < req.intelligence { missing.append(.intelligence) }
+        if stats[.faith] < req.faith { missing.append(.faith) }
 
-        // Effective stats: two-handing grants 1.5x effective Strength (both for
-        // requirements and scaling), matching DS3's two-handing bonus.
-        var effective = stats
-        if instance.twoHanded && weapon.canTwoHand {
-            effective[.strength] = Int((Double(stats[.strength]) * 1.5).rounded(.down))
+        guard let variant = weapon.variant(instance.infusion) else {
+            // Shields, bows, crossbows: only the listed base physical attack.
+            let base = (weapon.baseAttack ?? 0)
+            return AttackRatingResult(breakdown: [.physical: base], total: base, meetsRequirements: missing.isEmpty, missing: missing)
         }
-
-        // Requirement penalty: ratio of effective stat to requirement, worst stat wins,
-        // floored at 40% damage (DS3 never zeroes out damage for being underleveled).
-        var worstRatio = 1.0
-        for stat: StatType in [.strength, .dexterity, .intelligence, .faith] {
-            let requirement = weapon.requirements.requirement(for: stat)
-            guard requirement > 0 else { continue }
-            let ratio = min(1.0, Double(effective[stat]) / Double(requirement))
-            worstRatio = min(worstRatio, ratio)
-        }
-        let requirementMultiplier = worstRatio < 1.0 ? max(0.4, worstRatio) : 1.0
-
-        // Base damage after upgrade level and infusion's physical multiplier / elemental split.
-        let upgradeMult = upgradeMultiplier(level: instance.upgradeLevel, maxUpgrade: weapon.maxUpgrade)
+        let L = variant.level(instance.upgradeLevel)
+        let g = variant.curves
+        let c = { (i: Int) in L[5 + i] / 100 }
+        let dex = stats[.dexterity], int = stats[.intelligence], fth = stats[.faith], lck = stats[.luck]
+        var physScale = c(0) * curveValue(g[0], str) + c(1) * curveValue(g[0], dex) + c(4) * curveValue(g[0], lck)
+        if variant.infusion == .blessed { physScale += c(3) * curveValue(g[0], fth) }
+        let parts: [Double] = [
+            L[0] * (1 + physScale),
+            L[1] * (1 + c(2) * curveValue(g[1], int)),
+            L[2] * (1 + c(2) * curveValue(g[2], int) + c(3) * curveValue(g[2], fth)),
+            L[3] * (1 + c(3) * curveValue(g[3], fth)),
+            L[4] * (1 + c(2) * curveValue(g[4], int) + c(3) * curveValue(g[4], fth)),
+        ]
         var breakdown: [DamageType: Double] = [:]
-        breakdown[.physical] = weapon.baseDamage.physical * upgradeMult * instance.infusion.physicalMultiplier
-        breakdown[.magic] = weapon.baseDamage.magic * upgradeMult
-        breakdown[.fire] = weapon.baseDamage.fire * upgradeMult
-        breakdown[.lightning] = weapon.baseDamage.lightning * upgradeMult
-        breakdown[.dark] = weapon.baseDamage.dark * upgradeMult
-
-        if weapon.infusable, let elementalType = instance.infusion.elementalType {
-            let addedElemental = weapon.baseDamage.physical * instance.infusion.elementalFraction * upgradeMult
-            breakdown[elementalType, default: 0] += addedElemental
-        }
-
-        // Scaling bonus, using the infusion's overridden scaling grades when present.
-        let effectiveScaling = (weapon.infusable ? instance.infusion.overriddenScaling : nil) ?? weapon.scaling
-        for stat: StatType in [.strength, .dexterity, .intelligence, .faith] {
-            let grade = effectiveScaling.grade(for: stat)
-            guard grade != .none else { continue }
-            let curve = scalingCurve(statValue: effective[stat])
-            let bonusFraction = grade.multiplierAt99 * curve
-            let bonusAmount = weapon.baseDamage.physical * upgradeMult * bonusFraction
-            switch stat {
-            case .strength, .dexterity:
-                breakdown[.physical, default: 0] += bonusAmount
-            case .intelligence:
-                breakdown[.magic, default: 0] += bonusAmount
-            case .faith:
-                // Add to whichever faith-adjacent elemental the weapon already carries;
-                // fall back to lightning as the representative "miracle" element.
-                if breakdown[.dark, default: 0] > 0 {
-                    breakdown[.dark, default: 0] += bonusAmount
-                } else if breakdown[.fire, default: 0] > 0 {
-                    breakdown[.fire, default: 0] += bonusAmount
-                } else {
-                    breakdown[.lightning, default: 0] += bonusAmount
-                }
-            default: break
-            }
-        }
-
-        for key in breakdown.keys {
-            breakdown[key]! *= requirementMultiplier
-        }
-        let total = breakdown.values.reduce(0, +)
-
-        return AttackRatingResult(
-            breakdown: breakdown,
-            total: total,
-            meetsRequirements: worstRatio >= 1.0,
-            requirementRatio: worstRatio
-        )
+        for (i, type) in DamageType.allCases.enumerated() where parts[i] > 0 { breakdown[type] = parts[i] }
+        return AttackRatingResult(breakdown: breakdown, total: parts.reduce(0, +), meetsRequirements: missing.isEmpty, missing: missing)
     }
 
-    // MARK: - Defenses & resistances (straight sums of equipped armor)
+    // MARK: - Spell buff (catalysts)
+
+    /// Spell buff = 100 x (1 + (INT correction x curve(INT) + FTH correction x curve(FTH)) / 10000), rounded down.
+    /// Archdeacon's Great Staff counts as 100 for weapon buffs.
+    static func spellBuff(of weapon: Weapon, upgrade: Int, stats: StatBlock) -> Int {
+        guard let cat = weapon.catalyst else { return 0 }
+        if weapon.name == "Archdeacon's Great Staff" { return 100 }
+        let k = cat.spellBuff[max(0, min(cat.spellBuff.count - 1, upgrade))]
+        let s = k[0] * curveValue(cat.curves[0], stats[.intelligence]) * 100 + k[1] * curveValue(cat.curves[1], stats[.faith]) * 100
+        return Int((100 * (1 + s / 10000)).rounded(.down))
+    }
+
+    // MARK: - Defenses (armor values are absorption percentages; they stack multiplicatively)
+
+    static func combinedAbsorption(_ values: [Double]) -> Double {
+        (1 - values.reduce(1.0) { $0 * (1 - $1 / 100) }) * 100
+    }
 
     static func totalPhysicalDefense(pieces: [ArmorPiece]) -> PhysicalDefense {
-        pieces.reduce(into: PhysicalDefense()) { acc, piece in
-            acc.standard += piece.physicalDefense.standard
-            acc.strike += piece.physicalDefense.strike
-            acc.slash += piece.physicalDefense.slash
-            acc.thrust += piece.physicalDefense.thrust
-        }
+        PhysicalDefense(standard: combinedAbsorption(pieces.map(\.physicalDefense.standard)),
+                        strike: combinedAbsorption(pieces.map(\.physicalDefense.strike)),
+                        slash: combinedAbsorption(pieces.map(\.physicalDefense.slash)),
+                        thrust: combinedAbsorption(pieces.map(\.physicalDefense.thrust)))
     }
 
     static func totalElementalDefense(pieces: [ArmorPiece]) -> ElementalDefense {
-        pieces.reduce(into: ElementalDefense()) { acc, piece in
-            acc.magic += piece.elementalDefense.magic
-            acc.fire += piece.elementalDefense.fire
-            acc.lightning += piece.elementalDefense.lightning
-            acc.dark += piece.elementalDefense.dark
-        }
+        ElementalDefense(magic: combinedAbsorption(pieces.map(\.elementalDefense.magic)),
+                         fire: combinedAbsorption(pieces.map(\.elementalDefense.fire)),
+                         lightning: combinedAbsorption(pieces.map(\.elementalDefense.lightning)),
+                         dark: combinedAbsorption(pieces.map(\.elementalDefense.dark)))
     }
 
     static func totalResistances(pieces: [ArmorPiece]) -> Resistances {

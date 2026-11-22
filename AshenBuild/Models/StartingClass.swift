@@ -8,8 +8,12 @@ struct StartingClass: Codable, Identifiable, Hashable {
     let name: String
     let flavor: String
     let baseStats: [String: Int]      // keyed by StatType.rawValue for easy JSON
-    let startingWeaponIDs: [String]   // convenience pre-fill, not a hard restriction
+    /// Starting equipment as in the game (slots 1-3 of each hand).
+    let rightHand: [String]
+    let leftHand: [String]
     let startingArmorIDs: [String]
+    let spellIDs: [String]
+    let ringIDs: [String]
 
     var statBlock: StatBlock {
         var values: [StatType: Int] = [:]

@@ -1,48 +1,8 @@
 import SwiftUI
 
-extension WeaponCategory {
-    /// Short community abbreviation shown on weapon cards.
-    var abbreviation: String {
-        switch self {
-        case .dagger: return "DGR"
-        case .straightSword: return "SS"
-        case .greatsword: return "GS"
-        case .ultraGreatsword: return "UGS"
-        case .curvedSword: return "CS"
-        case .katana: return "KAT"
-        case .thrustingSword: return "TS"
-        case .axe: return "AXE"
-        case .greataxe: return "GA"
-        case .hammer: return "HAM"
-        case .greatHammer: return "GH"
-        case .spear: return "SPR"
-        case .halberd: return "HAL"
-        case .whip: return "WHP"
-        case .fist: return "FST"
-        case .bow: return "BOW"
-        case .greatbow: return "GB"
-        case .crossbow: return "XBW"
-        case .sorceryStaff: return "STF"
-        case .talisman: return "TAL"
-        case .chime: return "CHM"
-        case .pyromancyFlame: return "PYR"
-        case .smallShield: return "SH"
-        case .greatshield: return "GSH"
-        }
-    }
-
-    var tint: Color {
-        if isCastingTool { return .purple }
-        if isShield { return .gray }
-        switch self {
-        case .bow, .greatbow, .crossbow: return .teal
-        default: return .accentColor
-        }
-    }
-}
-
-/// Grid of weapon cards. Each card shows the attack rating this build would get with
-/// that weapon at the current upgrade level, so you can compare at a glance.
+/// Grid of weapon cards. Each melee card shows the attack rating this build would get with
+/// that weapon (uninfused, at the slot's upgrade level); catalysts show their spell buff;
+/// shields and ranged weapons show their base attack.
 struct WeaponGridPicker: View {
     enum Sort: String, CaseIterable, Identifiable {
         case attack = "Attack Rating", name = "Name", weight = "Weight"
@@ -52,51 +12,59 @@ struct WeaponGridPicker: View {
     let title: String
     let spec: BuildSpec
     let setup: WeaponSetup
-    let onSelect: (String?) -> Void
+    /// Called with the chosen weapon and the upgrade level its card showed.
+    let onSelect: (String?, Int) -> Void
 
     @Environment(DataStore.self) private var dataStore
     @Environment(\.dismiss) private var dismiss
     @State private var query = ""
-    @State private var category: WeaponCategory?
+    @State private var category: String?
     @AppStorage("weaponSort") private var sort: Sort = .attack
 
-    private struct Entry: Identifiable {
+    struct Entry: Identifiable {
         let weapon: Weapon
-        let attack: Double
-        let meetsRequirements: Bool
+        let value: Double
+        let valueLabel: String
+        let upgrade: Int
         let missing: Set<StatType>
         var id: String { weapon.id }
     }
 
     private var entries: [Entry] {
         let report = BuildCalculator.report(for: spec, data: dataStore)
-        let currentMax = dataStore.weapon(setup.weaponID)?.maxUpgrade ?? 10
-        let progress = Double(setup.upgrade) / Double(max(1, currentMax))
+        let stats = report.effectiveStats
+        // Compare at the same upgrade progress as this slot, or as the held weapon for an empty slot.
+        let reference = setup.weaponID != nil ? setup : spec.mainHand
+        let currentMax = dataStore.weapon(reference.weaponID)?.maxUpgrade ?? 10
+        let progress = reference.weaponID == nil ? 0 : Double(reference.upgrade) / Double(max(1, currentMax))
         let all = dataStore.weapons.map { weapon -> Entry in
-            let trial = WeaponSetup(weaponID: weapon.id, upgrade: Int((progress * Double(weapon.maxUpgrade)).rounded()),
-                                    infusion: .none, twoHanded: setup.twoHanded)
-            let result = BuildCalculator.weaponReport(trial, effective: report.effectiveStats,
-                                                      rings: report.rings, load: report.load, data: dataStore)
-            let missing = Set(Optimizer.damageStats.filter { stat in
-                var have = report.effectiveStats[stat]
-                if stat == .strength && setup.twoHanded && weapon.canTwoHand { have = Int((Double(have) * 1.5).rounded(.down)) }
-                return weapon.requirements.requirement(for: stat) > have
-            })
-            return Entry(weapon: weapon, attack: result?.total ?? 0, meetsRequirements: missing.isEmpty, missing: missing)
+            let upgrade = Int((progress * Double(weapon.maxUpgrade)).rounded())
+            let req = weapon.requirements(.none)
+            var missing = Set<StatType>()
+            let str = setup.twoHanded && weapon.canTwoHand ? Int((Double(stats[.strength]) * 1.5).rounded(.down)) : stats[.strength]
+            if str < req.strength { missing.insert(.strength) }
+            if stats[.dexterity] < req.dexterity { missing.insert(.dexterity) }
+            if stats[.intelligence] < req.intelligence { missing.insert(.intelligence) }
+            if stats[.faith] < req.faith { missing.insert(.faith) }
+            if weapon.kind == .catalyst {
+                let sb = Double(Formulas.spellBuff(of: weapon, upgrade: upgrade, stats: stats))
+                return Entry(weapon: weapon, value: sb, valueLabel: "SB", upgrade: upgrade, missing: missing)
+            }
+            let result = Formulas.attackRating(
+                for: .init(weapon: weapon, upgradeLevel: upgrade, infusion: .none, twoHanded: setup.twoHanded),
+                stats: stats)
+            return Entry(weapon: weapon, value: result.total, valueLabel: weapon.hasAttackTables ? "AR" : "ATK", upgrade: upgrade, missing: missing)
         }
         let filtered = all.filter { entry in
             (category == nil || entry.weapon.category == category) &&
             (query.isEmpty || entry.weapon.name.localizedCaseInsensitiveContains(query))
         }
         switch sort {
-        case .attack: return filtered.sorted { $0.attack > $1.attack }
+        case .attack:   // usable weapons first, then by value
+            return filtered.sorted { ($0.missing.isEmpty ? 1 : 0, $0.value) > ($1.missing.isEmpty ? 1 : 0, $1.value) }
         case .name: return filtered.sorted { $0.weapon.name < $1.weapon.name }
         case .weight: return filtered.sorted { $0.weapon.weight < $1.weapon.weight }
         }
-    }
-
-    private var categories: [WeaponCategory] {
-        WeaponCategory.allCases.filter { c in dataStore.weapons.contains { $0.category == c } }
     }
 
     var body: some View {
@@ -106,7 +74,7 @@ struct WeaponGridPicker: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 158), spacing: 12)], spacing: 12) {
                 ForEach(entries) { entry in
                     Button {
-                        onSelect(entry.weapon.id)
+                        onSelect(entry.weapon.id, entry.upgrade)
                         dismiss()
                     } label: {
                         WeaponCard(entry: entry, selected: entry.weapon.id == setup.weaponID)
@@ -120,9 +88,7 @@ struct WeaponGridPicker: View {
             .animation(.snappy, value: sort)
         }
         .overlay {
-            if entries.isEmpty {
-                ContentUnavailableView.search(text: query)
-            }
+            if entries.isEmpty { ContentUnavailableView.search(text: query) }
         }
         .background(Color(.systemGroupedBackground))
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search weapons")
@@ -136,8 +102,8 @@ struct WeaponGridPicker: View {
                     }
                     if setup.weaponID != nil {
                         Divider()
-                        Button("Unequip", systemImage: "xmark.circle", role: .destructive) {
-                            onSelect(nil)
+                        Button("Empty This Slot", systemImage: "xmark.circle", role: .destructive) {
+                            onSelect(nil, 0)
                             dismiss()
                         }
                     }
@@ -150,8 +116,8 @@ struct WeaponGridPicker: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 chip("All", selected: category == nil) { category = nil }
-                ForEach(categories) { c in
-                    chip(c.displayName, selected: category == c) { category = c }
+                ForEach(dataStore.weaponCategories, id: \.self) { c in
+                    chip(c, selected: category == c) { category = c }
                 }
             }
             .padding(.horizontal)
@@ -181,11 +147,7 @@ struct WeaponGridPicker: View {
             let weapon = entry.weapon
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text(weapon.category.abbreviation)
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 40, height: 28)
-                        .background(weapon.category.tint.gradient, in: .rect(cornerRadius: 7, style: .continuous))
+                    WeaponBadge(weapon: weapon)
                     Spacer()
                     if selected {
                         Image(systemName: "checkmark.circle.fill")
@@ -197,16 +159,16 @@ struct WeaponGridPicker: View {
                     Text(weapon.name)
                         .font(.subheadline.weight(.semibold))
                         .lineLimit(2, reservesSpace: true)
-                    Text(weapon.category.displayName)
+                    Text(weapon.category)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
                 HStack(alignment: .firstTextBaseline, spacing: 3) {
-                    Text("\(entry.attack.whole)")
+                    Text("\(entry.value.whole)")
                         .font(.title2.weight(.bold).monospacedDigit())
-                        .foregroundStyle(entry.meetsRequirements ? Color.primary : Color.secondary)
-                    Text("AR")
+                        .foregroundStyle(entry.missing.isEmpty ? Color.primary : Color.secondary)
+                    Text(entry.valueLabel)
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
                     Spacer()
@@ -229,8 +191,9 @@ struct WeaponGridPicker: View {
         }
 
         private var requirements: some View {
+            let req = entry.weapon.requirements(.none)
             let reqs = Optimizer.damageStats.compactMap { stat -> (StatType, Int)? in
-                let value = entry.weapon.requirements.requirement(for: stat)
+                let value = req.requirement(for: stat)
                 return value > 0 ? (stat, value) : nil
             }
             return HStack(spacing: 6) {
@@ -244,5 +207,20 @@ struct WeaponGridPicker: View {
             .lineLimit(1)
             .minimumScaleFactor(0.8)
         }
+    }
+}
+
+/// Category abbreviation in a tinted rounded rectangle.
+struct WeaponBadge: View {
+    let weapon: Weapon
+    var compact = false
+
+    var body: some View {
+        Text(weapon.abbreviation)
+            .font(compact ? .caption2.weight(.bold) : .caption.weight(.bold))
+            .foregroundStyle(.white)
+            .frame(width: compact ? 36 : 40, height: compact ? 26 : 28)
+            .background(weapon.tint.gradient, in: .rect(cornerRadius: compact ? 6 : 7, style: .continuous))
+            .accessibilityHidden(true)
     }
 }

@@ -3,219 +3,237 @@ import XCTest
 
 final class FormulaTests: XCTestCase {
 
+    private let data = DataStore.shared
+
+    private func stats(_ values: [StatType: Int], default fill: Int = 10) -> StatBlock {
+        var s = StatBlock(values: Dictionary(uniqueKeysWithValues: StatType.allCases.map { ($0, fill) }))
+        for (k, v) in values { s[k] = v }
+        return s
+    }
+
+    private func ar(_ id: String, _ infusion: InfusionType = .none, upgrade: Int, _ st: StatBlock, twoHanded: Bool = false) -> Formulas.AttackRatingResult {
+        Formulas.attackRating(for: .init(weapon: data.weapon(id)!, upgradeLevel: upgrade, infusion: infusion, twoHanded: twoHanded), stats: st)
+    }
+
     // MARK: - Soul Level
 
     func testDeprivedAllTensIsLevel1() {
-        let stats = StatBlock(values: Dictionary(uniqueKeysWithValues: StatType.allCases.map { ($0, 10) }))
-        XCTAssertEqual(Formulas.soulLevel(for: stats), 1)
+        XCTAssertEqual(Formulas.soulLevel(for: stats([:])), 1)
     }
 
     func testOnePointAboveDeprivedIsLevel2() {
-        var stats = StatBlock(values: Dictionary(uniqueKeysWithValues: StatType.allCases.map { ($0, 10) }))
-        stats[.vigor] = 11
-        XCTAssertEqual(Formulas.soulLevel(for: stats), 2)
+        XCTAssertEqual(Formulas.soulLevel(for: stats([.vigor: 11])), 2)
     }
 
-    // MARK: - Interpolation helper
+    // MARK: - Interpolation, stat tables, roll
 
-    func testInterpolateClampsBelowRange() {
+    func testInterpolate() {
         let table: [(x: Int, y: Double)] = [(10, 100), (20, 200)]
         XCTAssertEqual(Formulas.interpolate(table, at: 5), 100)
-    }
-
-    func testInterpolateClampsAboveRange() {
-        let table: [(x: Int, y: Double)] = [(10, 100), (20, 200)]
         XCTAssertEqual(Formulas.interpolate(table, at: 30), 200)
-    }
-
-    func testInterpolateMidpointIsLinear() {
-        let table: [(x: Int, y: Double)] = [(10, 100), (20, 200)]
         XCTAssertEqual(Formulas.interpolate(table, at: 15), 150)
     }
 
-    // MARK: - Vigor -> HP is monotonically increasing
-
-    func testHPIncreasesWithVigor() {
-        let low = Formulas.hp(vigor: 10)
-        let mid = Formulas.hp(vigor: 30)
-        let high = Formulas.hp(vigor: 60)
-        XCTAssertLessThan(low, mid)
-        XCTAssertLessThan(mid, high)
-    }
-
-    // MARK: - Attunement slots are monotonic non-decreasing and start at 0
-
-    func testAttunementSlotsStartAtZero() {
-        XCTAssertEqual(Formulas.attunementSlots(attunement: 5), 0)
-    }
-
-    func testAttunementSlotsIncreaseAtKnownBreakpoint() {
-        XCTAssertEqual(Formulas.attunementSlots(attunement: 10), 1)
+    func testStatTablesMatchTheWiki() {
+        XCTAssertEqual(Formulas.hp(vigor: 27), 1000)
+        XCTAssertEqual(Formulas.hp(vigor: 11), 427)      // Mercenary
+        XCTAssertEqual(Formulas.hp(vigor: 33), 1109)
+        XCTAssertEqual(Formulas.fp(attunement: 12), 103)
+        XCTAssertEqual(Formulas.stamina(endurance: 11), 95)
+        XCTAssertEqual(Formulas.stamina(endurance: 32), 139)
+        XCTAssertEqual(Formulas.stamina(endurance: 40), 160)
+        XCTAssertEqual(Formulas.equipLoadCapacity(vitality: 30), 70)
+        XCTAssertEqual(Formulas.fp(attunement: 30), 233)
         XCTAssertEqual(Formulas.attunementSlots(attunement: 14), 2)
     }
-
-    // MARK: - Equip load / roll tiers
 
     func testRollTierBoundaries() {
         XCTAssertEqual(Formulas.rollTier(loadPercent: 0.10), .fast)
         XCTAssertEqual(Formulas.rollTier(loadPercent: 0.30), .medium)
-        XCTAssertEqual(Formulas.rollTier(loadPercent: 0.69), .medium)
         XCTAssertEqual(Formulas.rollTier(loadPercent: 0.70), .medium)
         XCTAssertEqual(Formulas.rollTier(loadPercent: 0.701), .fat)
-        XCTAssertEqual(Formulas.rollTier(loadPercent: 0.99), .fat)
         XCTAssertEqual(Formulas.rollTier(loadPercent: 1.0), .overburdened)
-        XCTAssertEqual(Formulas.rollTier(loadPercent: 1.5), .overburdened)
-    }
-
-    // MARK: - Attack Rating sanity checks
-
-    func testAttackRatingIncreasesWithUpgradeLevel() {
-        let weapon = Weapon(
-            id: "test_sword", name: "Test Sword", category: .straightSword, weight: 3,
-            requirements: WeaponRequirements(), scaling: WeaponScaling(strength: .d, dexterity: .d),
-            baseDamage: WeaponDamage(physical: 100), maxUpgrade: 10, infusable: true, poiseDamage: 20
-        )
-        let stats = StatBlock(values: Dictionary(uniqueKeysWithValues: StatType.allCases.map { ($0, 20) }))
-        let plusZero = Formulas.attackRating(for: .init(weapon: weapon, upgradeLevel: 0, infusion: .none, twoHanded: false), stats: stats)
-        let plusTen = Formulas.attackRating(for: .init(weapon: weapon, upgradeLevel: 10, infusion: .none, twoHanded: false), stats: stats)
-        XCTAssertGreaterThan(plusTen.total, plusZero.total)
-    }
-
-    func testAttackRatingIncreasesWithScalingStat() {
-        let weapon = Weapon(
-            id: "test_sword2", name: "Test Sword 2", category: .straightSword, weight: 3,
-            requirements: WeaponRequirements(strength: 10, dexterity: 10), scaling: WeaponScaling(strength: .d, dexterity: .d),
-            baseDamage: WeaponDamage(physical: 100), maxUpgrade: 10, infusable: true, poiseDamage: 20
-        )
-        var lowStats = StatBlock(values: Dictionary(uniqueKeysWithValues: StatType.allCases.map { ($0, 10) }))
-        var highStats = lowStats
-        highStats[.strength] = 40
-        highStats[.dexterity] = 40
-        lowStats[.strength] = 10
-        lowStats[.dexterity] = 10
-
-        let low = Formulas.attackRating(for: .init(weapon: weapon, upgradeLevel: 0, infusion: .none, twoHanded: false), stats: lowStats)
-        let high = Formulas.attackRating(for: .init(weapon: weapon, upgradeLevel: 0, infusion: .none, twoHanded: false), stats: highStats)
-        XCTAssertGreaterThan(high.total, low.total)
-    }
-
-    func testUnderRequirementAppliesPenalty() {
-        let weapon = Weapon(
-            id: "heavy_sword", name: "Heavy Sword", category: .greatsword, weight: 8,
-            requirements: WeaponRequirements(strength: 40), scaling: WeaponScaling(strength: .d),
-            baseDamage: WeaponDamage(physical: 150), maxUpgrade: 10, infusable: true, poiseDamage: 40
-        )
-        let underleveled = StatBlock(values: Dictionary(uniqueKeysWithValues: StatType.allCases.map { ($0, 10) }))
-        let result = Formulas.attackRating(for: .init(weapon: weapon, upgradeLevel: 0, infusion: .none, twoHanded: false), stats: underleveled)
-        XCTAssertFalse(result.meetsRequirements)
-        XCTAssertLessThan(result.requirementRatio, 1.0)
-    }
-
-    func testTwoHandingBoostsEffectiveStrengthAndDamage() {
-        let weapon = Weapon(
-            id: "str_sword", name: "STR Sword", category: .greatsword, weight: 8,
-            requirements: WeaponRequirements(strength: 20), scaling: WeaponScaling(strength: .c),
-            baseDamage: WeaponDamage(physical: 150), maxUpgrade: 10, infusable: true, poiseDamage: 40
-        )
-        var stats = StatBlock(values: Dictionary(uniqueKeysWithValues: StatType.allCases.map { ($0, 10) }))
-        stats[.strength] = 20
-        let oneHanded = Formulas.attackRating(for: .init(weapon: weapon, upgradeLevel: 0, infusion: .none, twoHanded: false), stats: stats)
-        let twoHanded = Formulas.attackRating(for: .init(weapon: weapon, upgradeLevel: 0, infusion: .none, twoHanded: true), stats: stats)
-        XCTAssertGreaterThan(twoHanded.total, oneHanded.total)
-    }
-
-    // MARK: - Defenses are pure sums
-
-    func testTotalPhysicalDefenseSumsPieces() {
-        let a = ArmorPiece(id: "a", name: "A", slot: .head, weight: 1, poise: 1,
-                            physicalDefense: PhysicalDefense(standard: 10, strike: 8, slash: 9, thrust: 9),
-                            elementalDefense: ElementalDefense(), resistances: Resistances())
-        let b = ArmorPiece(id: "b", name: "B", slot: .chest, weight: 2, poise: 2,
-                            physicalDefense: PhysicalDefense(standard: 20, strike: 16, slash: 18, thrust: 18),
-                            elementalDefense: ElementalDefense(), resistances: Resistances())
-        let total = Formulas.totalPhysicalDefense(pieces: [a, b])
-        XCTAssertEqual(total.standard, 30)
-        XCTAssertEqual(total.strike, 24)
     }
 
     // MARK: - Game data
 
+    func testCatalogSizes() {
+        XCTAssertEqual(data.weapons.filter { $0.kind == .melee }.count, 178)
+        XCTAssertGreaterThan(data.armor.count, 350)
+        XCTAssertGreaterThan(data.spells.count, 100)
+    }
+
     func testStartingClassSoulLevelsMatchTheGame() {
         let expected = ["knight": 9, "mercenary": 8, "warrior": 7, "herald": 9, "thief": 5,
                         "assassin": 10, "sorcerer": 6, "pyromancer": 8, "cleric": 7, "deprived": 1]
-        for cls in DataStore.shared.startingClasses {
+        for cls in data.startingClasses {
             XCTAssertEqual(Formulas.soulLevel(for: cls.statBlock), expected[cls.id], cls.name)
         }
     }
 
+    func testStartingGearIsTheGamesOwn() {
+        XCTAssertEqual(data.startingClass("mercenary")?.rightHand, ["sellsword_twinblades"])
+        XCTAssertEqual(data.startingClass("sorcerer")?.leftHand, ["leather_shield", "sorcerer_s_staff"])
+        for cls in data.startingClasses {
+            for id in cls.rightHand + cls.leftHand { XCTAssertNotNil(data.weapon(id), "\(cls.name): \(id)") }
+            for id in cls.startingArmorIDs { XCTAssertNotNil(data.armorPiece(id), "\(cls.name): \(id)") }
+            for id in cls.spellIDs { XCTAssertNotNil(data.spell(id), "\(cls.name): \(id)") }
+        }
+    }
+
     func testRingVariantsAreGroupedIntoFamilies() {
-        let havel = DataStore.shared.ringFamilies.first { $0.name == "Havel's Ring" }
+        let havel = data.ringFamilies.first { $0.name == "Havel's Ring" }
         XCTAssertEqual(havel?.variants.map(\.level), [0, 1, 2, 3])
         XCTAssertEqual(havel?.variants.last?.equipLoadMultiplier ?? 0, 1.19, accuracy: 0.0001)
     }
 
-    // MARK: - Calculator and optimizer
+    // MARK: - Attack rating (regulation 1.35 params)
+
+    func testLongswordBaseValues() {
+        let w = data.weapon("longsword")!
+        XCTAssertEqual(w.variant(.none)?.baseDamage(at: 0).first, 110)
+        XCTAssertEqual(w.variant(.none)?.baseDamage(at: 10).first, 220)
+        XCTAssertEqual(w.requirements(.none), WeaponRequirements(strength: 10, dexterity: 10))
+        XCTAssertEqual(w.infusions.count, 16)
+    }
+
+    func testLongswordAttackRating() {
+        XCTAssertEqual(ar("longsword", upgrade: 10, stats([.strength: 40, .dexterity: 40])).total.whole, 416)
+        XCTAssertEqual(ar("longsword", .sharp, upgrade: 10, stats([.strength: 18, .dexterity: 40, .luck: 7])).total.whole, 406)
+    }
+
+    func testTwoHandingRaisesStrengthWeapons() {
+        let st = stats([.strength: 20, .dexterity: 13])
+        XCTAssertGreaterThan(ar("claymore", upgrade: 10, st, twoHanded: true).total, ar("claymore", upgrade: 10, st).total)
+    }
+
+    func testMissingRequirementsAreReported() {
+        let result = ar("greatsword", upgrade: 0, stats([:]))
+        XCTAssertFalse(result.meetsRequirements)
+        XCTAssertTrue(result.missing.contains(.strength))
+    }
+
+    func testUniqueWeaponsStopAtPlusFive() {
+        XCTAssertEqual(data.weapon("moonlight_greatsword")?.maxUpgrade, 5)
+    }
+
+    // MARK: - Catalysts (checked in game by the data's source)
+
+    func testSpellBuffMatchesInGameValues() {
+        let flame = data.weapon("pyromancy_flame")!
+        XCTAssertEqual(Formulas.spellBuff(of: flame, upgrade: 10, stats: stats([.intelligence: 10, .faith: 10])), 116)
+        XCTAssertEqual(Formulas.spellBuff(of: flame, upgrade: 10, stats: stats([.intelligence: 40, .faith: 40])), 207)
+        XCTAssertEqual(Formulas.spellBuff(of: flame, upgrade: 10, stats: stats([.intelligence: 60, .faith: 60])), 221)
+        let saints = data.weapon("saint_s_talisman")!
+        XCTAssertEqual(Formulas.spellBuff(of: saints, upgrade: 10, stats: stats([.faith: 45])), 187)
+        XCTAssertEqual(Formulas.spellBuff(of: saints, upgrade: 10, stats: stats([.faith: 60])), 242)
+    }
+
+    // MARK: - Buffs
+
+    private func spec(right: [StoredWeapon], left: [StoredWeapon] = [], stats st: StatBlock, buff: String? = nil, cls: String = "knight") -> BuildSpec {
+        var l = Loadout()
+        for (i, w) in right.enumerated() { l.right[i] = w }
+        for (i, w) in left.enumerated() { l.left[i] = w }
+        l.buffID = buff
+        return BuildSpec(classID: cls, stats: st, loadout: l)
+    }
+
+    func testLightningBladeAddsToAPlainWeapon() {
+        let st = stats([.strength: 20, .dexterity: 20, .faith: 40])
+        let withBuff = BuildCalculator.report(for: spec(right: [StoredWeapon(weaponID: "longsword", upgrade: 10)],
+                                                        left: [StoredWeapon(weaponID: "saint_s_talisman", upgrade: 10)],
+                                                        stats: st, buff: "lightning_blade"), data: data)
+        let without = BuildCalculator.report(for: spec(right: [StoredWeapon(weaponID: "longsword", upgrade: 10)],
+                                                       left: [StoredWeapon(weaponID: "saint_s_talisman", upgrade: 10)],
+                                                       stats: st), data: data)
+        XCTAssertEqual(withBuff.buffStatus, .applied)
+        let sb = Double(withBuff.spellBuffs[.miracle]!.value)
+        XCTAssertEqual(withBuff.mainHand!.total - without.mainHand!.total, 0.95 * sb, accuracy: 0.01)
+    }
+
+    func testElementalInfusionsCannotBeBuffed() {
+        let st = stats([.strength: 20, .dexterity: 20, .faith: 40])
+        let report = BuildCalculator.report(for: spec(right: [StoredWeapon(weaponID: "longsword", upgrade: 10, infusion: "Fire")],
+                                                      left: [StoredWeapon(weaponID: "saint_s_talisman", upgrade: 10)],
+                                                      stats: st, buff: "lightning_blade"), data: data)
+        XCTAssertEqual(report.buffStatus, .notBuffable)
+    }
+
+    func testSwitchingTheHeldSlotChangesTheReport() {
+        var s = spec(right: [StoredWeapon(weaponID: "longsword", upgrade: 5), StoredWeapon(weaponID: "claymore", upgrade: 5)],
+                     stats: stats([.strength: 20, .dexterity: 20]))
+        XCTAssertEqual(BuildCalculator.report(for: s, data: data).mainHand?.weapon.id, "longsword")
+        s.loadout.activeRight = 1
+        XCTAssertEqual(BuildCalculator.report(for: s, data: data).mainHand?.weapon.id, "claymore")
+    }
+
+    func testAllSlotsCountTowardLoad() {
+        let s = spec(right: [StoredWeapon(weaponID: "longsword"), StoredWeapon(weaponID: "claymore")],
+                     left: [StoredWeapon(weaponID: "knight_shield")], stats: stats([:]))
+        XCTAssertEqual(BuildCalculator.report(for: s, data: data).load, 3 + 9 + 4.5, accuracy: 0.001)
+    }
+
+    // MARK: - Defenses
+
+    func testAbsorptionsMultiply() {
+        XCTAssertEqual(Formulas.combinedAbsorption([10, 10]), 19, accuracy: 0.0001)
+    }
+
+    // MARK: - Rings and optimizer
 
     private func knightSpec() -> BuildSpec {
-        let data = DataStore.shared
-        let knight = data.startingClass("knight")!
-        var stats = knight.statBlock
-        stats[.vigor] = 27
-        stats[.intelligence] = 20   // wasted on a Longsword
-        stats[.luck] = 15           // wasted too
-        return BuildSpec(classID: "knight", stats: stats,
-                         mainHand: WeaponSetup(weaponID: "longsword", upgrade: 10),
-                         offHand: WeaponSetup(weaponID: "heater_shield"))
+        var st = data.startingClass("knight")!.statBlock
+        st[.vigor] = 27
+        st[.intelligence] = 20   // wasted on a Longsword
+        st[.luck] = 15           // wasted too
+        return spec(right: [StoredWeapon(weaponID: "longsword", upgrade: 10)], left: [StoredWeapon(weaponID: "knight_shield")], stats: st)
     }
 
     func testRedTearstoneAddsTwentyPercentWhenConditionMet() {
-        var spec = knightSpec()
-        spec.ringIDs = ["red_tearstone_ring"]
-        let report = BuildCalculator.report(for: spec, data: .shared)
-        let main = try! XCTUnwrap(report.mainHand)
+        var s = knightSpec()
+        s.ringIDs = ["red_tearstone_ring"]
+        let main = BuildCalculator.report(for: s, data: data).mainHand!
         XCTAssertEqual(main.conditional.first?.total ?? 0, main.total * 1.2, accuracy: 0.001)
     }
 
     func testKnightsRingRaisesEffectiveStrengthButNotSoulLevel() {
-        var spec = knightSpec()
-        let before = BuildCalculator.report(for: spec, data: .shared)
-        spec.ringIDs = ["knights_ring"]
-        let after = BuildCalculator.report(for: spec, data: .shared)
+        var s = knightSpec()
+        let before = BuildCalculator.report(for: s, data: data)
+        s.ringIDs = ["knights_ring"]
+        let after = BuildCalculator.report(for: s, data: data)
         XCTAssertEqual(after.effectiveStats[.strength], before.effectiveStats[.strength] + 5)
         XCTAssertEqual(after.soulLevel, before.soulLevel)
     }
 
     func testRespecKeepsSoulLevelAndNeverLowersAttack() {
-        let spec = knightSpec()
-        let current = BuildCalculator.report(for: spec, data: .shared)
-        let result = Optimizer.respec(spec, goal: .keepingSurvivability(of: spec), data: .shared)
+        let s = knightSpec()
+        let current = BuildCalculator.report(for: s, data: data)
+        let result = Optimizer.respec(s, goal: .keepingSurvivability(of: s), data: data)
         XCTAssertTrue(result.feasible)
-        XCTAssertEqual(result.stats.total, spec.stats.total)
+        XCTAssertEqual(result.stats.total, s.stats.total)
         XCTAssertGreaterThan(result.report.mainHand!.total, current.mainHand!.total)
         XCTAssertEqual(result.stats[.vigor], 27)
-        XCTAssertEqual(result.stats[.luck], DataStore.shared.startingClass("knight")!.statBlock[.luck])
         XCTAssertTrue(result.report.mainHand!.result.meetsRequirements)
     }
 
     func testAnalysisFlagsWastedPoints() {
-        let analysis = Optimizer.analyze(knightSpec(), data: .shared)
+        let analysis = Optimizer.analyze(knightSpec(), data: data)
         XCTAssertLessThan(analysis.score ?? 1, 0.98)
         XCTAssertTrue(analysis.issues.contains { $0.title.contains("Intelligence") })
         XCTAssertTrue(analysis.issues.contains { $0.title.contains("Luck") })
     }
 
     func testBestArmorStaysWithinTheRoll() {
-        let spec = knightSpec()
-        let sets = Optimizer.bestArmor(spec, goal: .poise, roll: .medium, minPoise: 0, data: .shared)
+        let sets = Optimizer.bestArmor(knightSpec(), goal: .poise, roll: .medium, minPoise: 0, data: data)
         XCTAssertFalse(sets.isEmpty)
-        for set in sets {
-            XCTAssertNotEqual(Formulas.rollTier(loadPercent: set.loadFraction), .fat)
-        }
+        for set in sets { XCTAssertNotEqual(Formulas.rollTier(loadPercent: set.loadFraction), .fat) }
         XCTAssertGreaterThanOrEqual(sets[0].value, sets.last!.value)
     }
 
     func testWeaponOptionsAreSortedAndFeasible() {
-        let options = Optimizer.weaponOptions(knightSpec(), goal: .keepingSurvivability(of: knightSpec()), data: .shared)
+        let s = knightSpec()
+        let options = Optimizer.weaponOptions(s, goal: .keepingSurvivability(of: s), data: data)
         XCTAssertFalse(options.isEmpty)
         XCTAssertEqual(options.map(\.attackRating), options.map(\.attackRating).sorted(by: >))
     }

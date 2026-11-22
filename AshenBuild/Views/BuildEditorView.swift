@@ -4,14 +4,26 @@ enum EditorSection: String, CaseIterable, Identifiable {
     case character = "Stats"
     case weapons = "Weapons"
     case armor = "Armor"
+    case magic = "Magic"
     case summary = "Summary"
     case optimize = "Optimize"
 
     var id: Self { self }
+
+    var symbol: String {
+        switch self {
+        case .character: return "person.fill"
+        case .weapons: return "shield.lefthalf.filled"
+        case .armor: return "tshirt.fill"
+        case .magic: return "sparkles"
+        case .summary: return "list.bullet.rectangle"
+        case .optimize: return "gauge.with.dots.needle.67percent"
+        }
+    }
 }
 
 /// Edits one build. A segmented control under the navigation bar switches between the
-/// five sections (a tab bar belongs at the app's top level, not on a pushed screen).
+/// six sections (a tab bar belongs at the app's top level, not on a pushed screen).
 /// All edits write straight into the SwiftData `SavedBuild`, which SwiftData autosaves.
 struct BuildEditorView: View {
     @Bindable var build: SavedBuild
@@ -23,19 +35,38 @@ struct BuildEditorView: View {
             case .character: ClassLevelTab(build: build)
             case .weapons: WeaponsTab(build: build)
             case .armor: ArmorTab(build: build)
+            case .magic: MagicTab(build: build)
             case .summary: SummaryTab(build: build)
             case .optimize: OptimizeTab(build: build)
             }
         }
         .topAccessoryBar {
-            Picker("Section", selection: $section) {
-                ForEach(EditorSection.allCases) { section in
-                    Text(section.rawValue).tag(section)
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(EditorSection.allCases) { item in
+                            Button {
+                                withAnimation(.snappy) { section = item }
+                            } label: {
+                                Label(item.rawValue, systemImage: item.symbol)
+                                    .font(.subheadline.weight(.semibold))
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 8)
+                                    .foregroundStyle(section == item ? Color.white : Color.primary)
+                                    .background(section == item ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(Color(.tertiarySystemFill)),
+                                                in: .capsule)
+                            }
+                            .buttonStyle(.plain)
+                            .id(item)
+                            .accessibilityAddTraits(section == item ? .isSelected : [])
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
                 }
+                .onChange(of: section) { withAnimation { proxy.scrollTo(section, anchor: .center) } }
+                .onAppear { proxy.scrollTo(section, anchor: .center) }
             }
-            .pickerStyle(.segmented)
-            .padding(.horizontal)
-            .padding(.bottom, 8)
         }
         .navigationTitle($build.name)
         .navigationBarTitleDisplayMode(.inline)

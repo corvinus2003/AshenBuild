@@ -1,6 +1,6 @@
 # Ashen Build
 
-> **Alpha.** Ashen Build is incomplete and under active development. The weapon and armor catalogs are partial, the attack-rating model is approximate, and the app is not on the App Store yet. Treat the numbers as a planning aid, not as exact in-game values.
+> **Alpha.** Ashen Build is incomplete and under active development, and it is not on the App Store yet. Attack rating and spell buff now use the game's own parameters, but some parts are still simplified (see [Accuracy and data](#accuracy-and-data)). Treat the numbers as a planning aid.
 
 **A unified min-max builder for Dark Souls III, on iPhone.**
 
@@ -22,17 +22,23 @@ The question it answers: **is my build optimized enough, and what would be bette
 
 | Area | Status |
 |---|---|
-| Starting classes (all 10) with correct base stats | Done |
+| Starting classes (all 10) with correct base stats and starting gear (weapons, shield, catalyst, spells, armor, ring) | Done |
 | Attributes: type a value or use the stepper; values below the class base are refused | Done |
-| HP, FP, stamina, equip load, roll thresholds (fast / mid / fat) | Done, from community-documented tables |
+| HP, FP, stamina, equip load, roll thresholds (fast / mid / fat) | Done, per-level wiki tables |
 | Rings: pick a ring, then its +1 / +2 / +3 level; no duplicates | Done (76 variants) |
 | Ring effects for *your* build, e.g. "AR 121 → 145 at or below 20% HP" | Done |
-| Weapon grid showing the attack rating your character would get with each weapon | Done (63 weapons) |
-| Armor sorted by any stat (poise, lightning, bleed, weight…) | Done (36 pieces) |
+| Weapon grid showing the attack rating your character would get with each weapon | Done (284 weapons, shields, catalysts and ranged weapons, base game and both DLCs) |
+| Three slots per hand; tap a slot in Summary to hold it and every number follows | Done |
+| Upgrade level typed directly (+0 to +10, or +5 for unique weapons) | Done |
+| Attack rating from the game's parameters: every infusion, every upgrade level, scaling curves | Done |
+| Catalysts (staves, talismans, chimes, pyromancy flames): spell buff per school | Done |
+| Spells: attunement slots, FP cost, requirements, which catalyst can cast them | Done (106 spells) |
+| Weapon buffs (spell buffs and resins), with a check for which weapons can take a buff | Done |
+| Armor sorted by any stat (poise, lightning, bleed, weight…), absorption combined as in the game | Done (360 pieces) |
 | Optimizer: score, findings, Rosaria respec, best infusion, strongest weapons | Done |
 | Armor min-max search for a target roll and poise floor | Done |
-| Full weapon and armor catalogs | Not yet |
-| Exact per-weapon attack-rating tables, spells, buffs, split damage vs. enemy defenses | Not yet |
+| Spell damage per cast, damage against enemy defenses | Not yet |
+| Damage penalty when stat requirements are not met | Not yet (the app warns instead) |
 
 ## How the optimizer works
 
@@ -48,9 +54,11 @@ The same approach (a calculator for derived stats, constraints, an objective and
 
 ## Accuracy and data
 
-- Starting classes, ring effects and the HP / stamina / FP / equip-load tables were checked against the community [Fextralife Dark Souls III wiki](https://darksouls3.wiki.fextralife.com/) (November 2026). Values are numbers and game facts; descriptions in the app are written for this project.
-- The weapon and armor catalogs are a subset of the game.
-- Attack rating uses a simplified scaling model. Comparisons between options are meaningful; absolute numbers can differ from the game.
+- **Weapons, catalysts and scaling curves** come from the game's parameter files (patch 1.15.2, regulation 1.35) as extracted by [heyobi/ds3-frame-dps](https://github.com/heyobi/ds3-frame-dps) (MIT). Attack rating uses the game formula: base damage per upgrade level, scaling correction and the stat curve for each damage type. Unit tests check it against known in-game values (for example a +10 Longsword at 40/40, and Pyromancy Flame / Saint's Talisman spell buff).
+- **Armor** values (absorption, poise, resistances, weight) come from the game data collected in [3dots/ds3optimizer](https://github.com/3dots/ds3optimizer).
+- **Shields, bows, spells, weights and starting gear**, and the HP / FP / stamina / equip-load tables, were checked against the community [Fextralife Dark Souls III wiki](https://darksouls3.wiki.fextralife.com/) (November 2026).
+- Values are numbers and game facts; descriptions in the app are written for this project.
+- Known gaps: spell damage per cast is not modelled (catalysts show spell buff); shields and ranged weapons show base attack only; the damage penalty for unmet requirements is not modelled; the Follower Torch weight is unverified.
 
 ## Build and run
 
@@ -70,10 +78,9 @@ Code map: game data in `AshenBuild/GameData/*.json`, stat curves in `Formulas.sw
 
 ## Roadmap
 
-1. Complete weapon, shield, catalyst and armor catalogs.
-2. Exact attack-rating model with per-weapon scaling and correction curves.
-3. Damage against enemy defenses and spell/buff calculations.
-4. TestFlight beta ([public link](https://testflight.apple.com/join/xMFAM1cS), see [AppStore/README.md](AppStore/README.md)), then the App Store.
+1. Spell damage per cast and the requirement penalty.
+2. Damage against enemy defenses and motion values.
+3. TestFlight beta ([public link](https://testflight.apple.com/join/xMFAM1cS), see [AppStore/README.md](AppStore/README.md)), then the App Store.
 
 ## How it was built
 
