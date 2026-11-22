@@ -7,6 +7,7 @@ Ashen Build ships to **TestFlight first**. App Review guideline 2.2 keeps betas 
 | Bundle ID | `io.github.corvinus2003.ashenbuild` (can never change once published) |
 | Team | 83S5G3QWTM |
 | App Store Connect app ID | 6837857514 |
+| TestFlight public link | https://testflight.apple.com/join/xMFAM1cS (group "Public Alpha") |
 | Version | 0.1.0 (build 1) |
 | Store texts | [metadata/en-US.md](metadata/en-US.md) |
 | Screenshots (6.9", 1320×2868, no alpha) | [screenshots/](screenshots/) |
@@ -27,17 +28,17 @@ Raise `CURRENT_PROJECT_VERSION` (build number) before every new upload.
 
 App Store Connect, once
 - [x] My Apps ▸ + ▸ New App: iOS, name "Ashen Build", language English (U.S.), bundle ID `io.github.corvinus2003.ashenbuild`, SKU `ashenbuild`
-- [ ] App Privacy: Data Not Collected; privacy policy URL from metadata
+- [ ] App Privacy (before App Store 1.0): Data Not Collected; privacy policy URL from metadata
 - [ ] Age rating questionnaire: none of the items (expected 4+)
 
 Each build
-- [ ] `scripts/testflight.sh --upload`
+- [x] `scripts/testflight.sh --upload` (0.1.0 build 1)
 - [ ] Answer export compliance if asked (the app sets `ITSAppUsesNonExemptEncryption = NO`)
 
 TestFlight external testing
-- [ ] Test Information: beta description, what to test, feedback email, privacy URL (texts in metadata)
-- [ ] Create an external group, add the build, submit for Beta App Review
-- [ ] Turn on the public link and share it
+- [x] Test Information: beta description, what to test, feedback email, privacy URL (texts in metadata)
+- [x] Create an external group, add the build, submit for Beta App Review (internal group "Team" too)
+- [x] Turn on the public link and share it
 
 Before App Store 1.0
 - [ ] Full weapon and armor catalogs, exact attack-rating model

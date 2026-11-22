@@ -8,6 +8,8 @@ Ashen Build is a model for optimization in games. Every choice that shapes a cha
 
 The question it answers: **is my build optimized enough, and what would be better?**
 
+**Try the alpha on iPhone:** [TestFlight public link](https://testflight.apple.com/join/xMFAM1cS) (opens once Apple approves the first beta build).
+
 <p>
   <img src="docs/screenshots/1-start.png" width="180" alt="Start screen">
   <img src="docs/screenshots/2-stats.png" width="180" alt="Attributes you can type">
@@ -71,7 +73,7 @@ Code map: game data in `AshenBuild/GameData/*.json`, stat curves in `Formulas.sw
 1. Complete weapon, shield, catalyst and armor catalogs.
 2. Exact attack-rating model with per-weapon scaling and correction curves.
 3. Damage against enemy defenses and spell/buff calculations.
-4. TestFlight beta (being prepared: see [AppStore/README.md](AppStore/README.md)), then the App Store.
+4. TestFlight beta ([public link](https://testflight.apple.com/join/xMFAM1cS), see [AppStore/README.md](AppStore/README.md)), then the App Store.
 
 ## How it was built
 
