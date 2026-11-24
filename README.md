@@ -1,6 +1,6 @@
 # Ashen Build
 
-> **Alpha.** Ashen Build is incomplete and under active development, and version 1.0 is in App Store review. Attack rating and spell buff now use the game's own parameters, but some parts are still simplified (see [Accuracy and data](#accuracy-and-data)). Treat the numbers as a planning aid.
+> **Version 1.0** is in App Store review. Attack rating and spell buff use the game's own parameters; a few parts are still simplified and listed under [Accuracy and data](#accuracy-and-data). Development continues.
 
 **A unified min-max builder for Dark Souls III, on iPhone.**
 
@@ -8,7 +8,7 @@ Ashen Build is a model for optimization in games. Every choice that shapes a cha
 
 The question it answers: **is my build optimized enough, and what would be better?**
 
-**Try the alpha on iPhone:** [TestFlight public link](https://testflight.apple.com/join/xMFAM1cS) (opens once Apple approves the first beta build).
+**Test upcoming builds on iPhone:** [TestFlight public link](https://testflight.apple.com/join/xMFAM1cS).
 
 <p>
   <img src="docs/screenshots/1-start.png" width="180" alt="Start screen">
@@ -80,7 +80,7 @@ Code map: game data in `AshenBuild/GameData/*.json`, stat curves in `Formulas.sw
 
 1. Spell damage per cast and the requirement penalty.
 2. Damage against enemy defenses and motion values.
-3. TestFlight beta ([public link](https://testflight.apple.com/join/xMFAM1cS), see [AppStore/README.md](AppStore/README.md)), then the App Store.
+3. New builds go to TestFlight first ([public link](https://testflight.apple.com/join/xMFAM1cS), see [AppStore/README.md](AppStore/README.md)), then to the App Store.
 
 ## How it was built
 

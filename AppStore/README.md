@@ -1,6 +1,6 @@
 # TestFlight and App Store
 
-Ashen Build ships to **TestFlight first**. App Review guideline 2.2 keeps betas off the App Store, so the alpha stays on TestFlight until the catalogs and the attack-rating model are complete.
+Version 1.0 is submitted to the App Store. New builds go to **TestFlight first** for testing, then to the App Store.
 
 | | |
 | --- | --- |
@@ -8,7 +8,7 @@ Ashen Build ships to **TestFlight first**. App Review guideline 2.2 keeps betas 
 | Team | 83S5G3QWTM |
 | App Store Connect app ID | 6837857514 |
 | TestFlight public link | https://testflight.apple.com/join/xMFAM1cS (group "Public Alpha") |
-| Version | 1.0 (build 3) submitted to App Review 2026-11-24; TestFlight alpha 0.1.0 (2) |
+| Version | 1.0 (build 3) submitted to App Review 2026-11-24; TestFlight 0.1.0 (2) |
 | Store texts | [metadata/en-US.md](metadata/en-US.md) |
 | Screenshots 1.0 | [screenshots-1.0/](screenshots-1.0/) (6.9", 1320×2868) and [screenshots-1.0-6.3/](screenshots-1.0-6.3/) (6.3", 1206×2622, required) |
 | Privacy policy | [docs/privacy.md](../docs/privacy.md) |

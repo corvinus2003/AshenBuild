@@ -71,7 +71,7 @@ Data Not Collected.
 # TestFlight (external testing)
 
 ## Beta App Description [4000]
-Ashen Build is an alpha of a min-max build optimizer for Dark Souls III. Plan a character, test respecs, rings and armor, and see whether your build is optimized before spending anything in the game. The weapon and armor catalogs are still partial and attack rating is approximate.
+Test builds of Ashen Build, a min-max build optimizer for Dark Souls III. Plan a character, test respecs, weapons, spells, rings and armor, and see whether your build is optimized before spending anything in the game.
 
 ## What to Test [4000]
 This is the first alpha (0.1.0).
