@@ -8,9 +8,9 @@ Ashen Build ships to **TestFlight first**. App Review guideline 2.2 keeps betas 
 | Team | 83S5G3QWTM |
 | App Store Connect app ID | 6837857514 |
 | TestFlight public link | https://testflight.apple.com/join/xMFAM1cS (group "Public Alpha") |
-| Version | 0.1.0 (build 1) |
+| Version | 1.0 (build 3) submitted to App Review 2026-11-24; TestFlight alpha 0.1.0 (2) |
 | Store texts | [metadata/en-US.md](metadata/en-US.md) |
-| Screenshots (6.9", 1320×2868, no alpha) | [screenshots/](screenshots/) |
+| Screenshots 1.0 | [screenshots-1.0/](screenshots-1.0/) (6.9", 1320×2868) and [screenshots-1.0-6.3/](screenshots-1.0-6.3/) (6.3", 1206×2622, required) |
 | Privacy policy | [docs/privacy.md](../docs/privacy.md) |
 | Privacy manifest | `AshenBuild/PrivacyInfo.xcprivacy` (UserDefaults, reason CA92.1; no data collected) |
 
@@ -28,8 +28,9 @@ Raise `CURRENT_PROJECT_VERSION` (build number) before every new upload.
 
 App Store Connect, once
 - [x] My Apps ▸ + ▸ New App: iOS, name "Ashen Build", language English (U.S.), bundle ID `io.github.corvinus2003.ashenbuild`, SKU `ashenbuild`
-- [ ] App Privacy (before App Store 1.0): Data Not Collected; privacy policy URL from metadata
-- [ ] Age rating questionnaire: none of the items (expected 4+)
+- [x] App Privacy: Data Not Collected, published; privacy policy URL from metadata
+- [x] Age rating: 13+ (references to weapons: Frequent; everything else None)
+- [x] Category Reference / Utilities, price Free, Content Rights: yes
 
 Each build
 - [x] `scripts/testflight.sh --upload` (0.1.0 build 1)
@@ -42,5 +43,5 @@ TestFlight external testing
 
 Before App Store 1.0
 - [ ] Full weapon and armor catalogs, exact attack-rating model
-- [ ] Version 1.0.0, App Store texts and screenshots, submit for review
+- [x] Version 1.0, App Store texts and screenshots, submitted for review (2026-11-24)
 - [ ] Keep "Dark Souls" out of the name, subtitle, keywords and screenshots (guideline 5.2.1)

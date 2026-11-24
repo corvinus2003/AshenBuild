@@ -9,19 +9,23 @@ Ashen Build
 Min-max build optimizer
 
 ## Promotional text [170]
-Is your build optimized? Plan stats, weapons, armor and rings, then let the optimizer find a better respec, before you spend a single soul in the game.
+Is your build optimized? Plan stats, weapons, spells, armor and rings, then let the optimizer find a better respec before you spend a single soul.
 
 ## Description [4000]
 Ashen Build is a min-max build planner for Dark Souls III. Plan a character on your iPhone and find out whether it is optimized, without spending in-game resources.
 
 PLAN
-• Pick one of the ten starting classes and type your attributes, or use the steppers. Values below the class base are refused.
-• Browse weapons in a grid that shows the attack rating your character would get with each one.
+• Pick one of the ten starting classes; each starts with its real gear. Type your attributes or use the steppers. Values below the class base are refused.
+• Browse every weapon, shield and catalyst in a grid that shows the attack rating your character would get with each one.
+• Hold up to three weapons in each hand, type the upgrade level, and switch the held weapon to see every number follow.
 • Sort armor by any stat: poise, physical, lightning, fire, bleed, weight and more.
 • Choose a ring, then its +1, +2 or +3 version.
 
 UNDERSTAND
-• See HP, FP, stamina, equip load and roll speed update as you change anything.
+• Attack rating from the game's own weapon values: every infusion, every upgrade level, every scaling curve.
+• Spell buff for staves, talismans, chimes and pyromancy flames; attuned spells against your attunement slots.
+• Weapon buffs and resins, and which of your weapons can take them.
+• HP, FP, stamina, equip load and roll speed update as you change anything.
 • See what each ring does for this build, for example the attack rating with Red Tearstone Ring active at low HP.
 
 OPTIMIZE
@@ -33,7 +37,7 @@ OPTIMIZE
 PRIVATE
 No account, no ads, no tracking, no data collected. Your builds stay on your iPhone.
 
-Ashen Build is an unofficial fan-made tool. It is not affiliated with or endorsed by FromSoftware or Bandai Namco Entertainment. Game names are used only to identify the game it is for. Numbers come from community-documented formulas and may differ slightly from the game.
+Ashen Build is an unofficial fan-made tool. It is not affiliated with or endorsed by FromSoftware or Bandai Namco Entertainment. Game names are used only to identify the game it is for.
 
 ## Keywords [100]
 build,planner,optimizer,respec,stats,calculator,rpg,soulslike,minmax,armor,weapon,ring,poise,damage

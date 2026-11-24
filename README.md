@@ -1,6 +1,6 @@
 # Ashen Build
 
-> **Alpha.** Ashen Build is incomplete and under active development, and it is not on the App Store yet. Attack rating and spell buff now use the game's own parameters, but some parts are still simplified (see [Accuracy and data](#accuracy-and-data)). Treat the numbers as a planning aid.
+> **Alpha.** Ashen Build is incomplete and under active development, and version 1.0 is in App Store review. Attack rating and spell buff now use the game's own parameters, but some parts are still simplified (see [Accuracy and data](#accuracy-and-data)). Treat the numbers as a planning aid.
 
 **A unified min-max builder for Dark Souls III, on iPhone.**
 
